@@ -1,17 +1,10 @@
-import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_dimensions.dart';
-import '../../../core/di/providers.dart';
+import '../../../data/quran/quran_providers.dart';
 import '../../../core/storage/local_storage.dart';
-
-final pageAyahsProvider = FutureProvider.family<List<dynamic>, int>((ref, page) async {
-  final dio = ref.read(dioProvider);
-  final res = await dio.get('https://api.alquran.cloud/v1/page/$page/quran-uthmani');
-  return res.data['data']['ayahs'] as List;
-});
 
 class QuranMushafScreen extends ConsumerStatefulWidget {
   final int initialPage;
@@ -259,20 +252,16 @@ class _PageTafsirListSheet extends StatelessWidget {
   }
 }
 
-class _TafsirSheet extends StatelessWidget {
+class _TafsirSheet extends ConsumerWidget {
   final int surah;
   final int ayah;
   final String ayahText;
   const _TafsirSheet({required this.surah, required this.ayah, required this.ayahText});
 
-  Future<String> _getTafsir() async {
-    final dio = Dio();
-    final res = await dio.get('https://api.alquran.cloud/v1/ayah/$surah:$ayah/ar.muyassar');
-    return res.data['data']['text'];
-  }
-
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final tafsirAsync = ref.watch(tafsirProvider((surah: surah, ayah: ayah)));
+
     return Container(
       padding: const EdgeInsets.all(AppDimensions.xl),
       decoration: const BoxDecoration(
@@ -291,18 +280,11 @@ class _TafsirSheet extends StatelessWidget {
           const Divider(color: AppColors.goldMuted, height: 32),
           const Text('التفسير الميسر', style: TextStyle(color: AppColors.gold, fontFamily: 'Amiri', fontSize: 18, fontWeight: FontWeight.bold)),
           const SizedBox(height: AppDimensions.md),
-          FutureBuilder<String>(
-            future: _getTafsir(),
-            builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                return const Padding(padding: EdgeInsets.symmetric(vertical: 32), child: CircularProgressIndicator(color: AppColors.gold));
-              }
-              if (snapshot.hasError) {
-                return const Text('تعذر تحميل التفسير', style: TextStyle(color: Colors.red, fontFamily: 'Amiri'));
-              }
-              return Text(snapshot.data!, textAlign: TextAlign.justify, textDirection: TextDirection.rtl,
-                style: const TextStyle(color: AppColors.textOnDark, fontFamily: 'Amiri', fontSize: 16, height: 1.6));
-            },
+          tafsirAsync.when(
+            loading: () => const Padding(padding: EdgeInsets.symmetric(vertical: 32), child: CircularProgressIndicator(color: AppColors.gold)),
+            error: (_, __) => const Text('تعذر تحميل التفسير', style: TextStyle(color: Colors.red, fontFamily: 'Amiri')),
+            data: (tafsir) => Text(tafsir, textAlign: TextAlign.justify, textDirection: TextDirection.rtl,
+              style: const TextStyle(color: AppColors.textOnDark, fontFamily: 'Amiri', fontSize: 16, height: 1.6)),
           ),
           const SizedBox(height: AppDimensions.xl),
         ],

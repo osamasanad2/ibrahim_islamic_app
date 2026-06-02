@@ -1,0 +1,25 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../core/di/providers.dart';
+import 'ayah_model.dart';
+import 'quran_repository.dart';
+import 'surah_meta.dart';
+
+final quranRepositoryProvider = Provider<QuranRepository>((ref) {
+  return QuranRepository(ref.read(dioProvider));
+});
+
+final surahListProvider = FutureProvider<List<SurahMeta>>((ref) async {
+  return ref.read(quranRepositoryProvider).getSurahList();
+});
+
+final surahContentProvider = FutureProvider.family<List<AyahModel>, int>((ref, surahNumber) async {
+  return ref.read(quranRepositoryProvider).getSurahContent(surahNumber);
+});
+
+final pageAyahsProvider = FutureProvider.family<List<dynamic>, int>((ref, page) async {
+  return ref.read(quranRepositoryProvider).getPageAyahs(page);
+});
+
+final tafsirProvider = FutureProvider.family<String, ({int surah, int ayah})>((ref, params) async {
+  return ref.read(quranRepositoryProvider).getTafsir(params.surah, params.ayah);
+});

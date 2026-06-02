@@ -2,42 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_dimensions.dart';
-import '../../../core/di/providers.dart';
 import '../../../core/storage/local_storage.dart';
+import '../../../data/quran/quran_providers.dart';
+import '../../../data/quran/surah_meta.dart';
 import 'surah_reader_screen.dart';
 import 'quran_mushaf_screen.dart';
-
-class SurahMeta {
-  final int number;
-  final String nameArabic;
-  final String nameEnglish;
-  final int ayahs;
-  final String revelationType;
-
-  const SurahMeta({
-    required this.number,
-    required this.nameArabic,
-    required this.nameEnglish,
-    required this.ayahs,
-    required this.revelationType,
-  });
-
-  factory SurahMeta.fromJson(Map<String, dynamic> json) => SurahMeta(
-        number: json['number'] as int,
-        nameArabic: json['name'] as String,
-        nameEnglish: json['englishName'] as String,
-        ayahs: json['numberOfAyahs'] as int,
-        revelationType: json['revelationType'] as String,
-      );
-}
-
-final surahListProvider = FutureProvider<List<SurahMeta>>((ref) async {
-  final dio = ref.read(dioProvider);
-  final res = await dio.get('https://api.alquran.cloud/v1/surah');
-  return (res.data['data'] as List)
-      .map((e) => SurahMeta.fromJson(e as Map<String, dynamic>))
-      .toList();
-});
 
 class QuranScreen extends ConsumerStatefulWidget {
   const QuranScreen({super.key});

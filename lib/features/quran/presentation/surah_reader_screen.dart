@@ -2,36 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_dimensions.dart';
-import '../../../../core/di/providers.dart';
 import '../../../../core/storage/local_storage.dart';
-import 'quran_screen.dart';
+import '../../../../data/quran/quran_providers.dart';
+import '../../../../data/quran/ayah_model.dart';
+import '../../../data/quran/surah_meta.dart';
 import 'widgets/ayah_audio_player.dart';
-
-class AyahModel {
-  final int numberInSurah;
-  final String text;
-  final String? translation;
-
-  const AyahModel({required this.numberInSurah, required this.text, this.translation});
-}
-
-final surahContentProvider = FutureProvider.family<List<AyahModel>, int>((ref, surahNumber) async {
-  final dio = ref.read(dioProvider);
-  final res = await dio.get(
-    'https://api.alquran.cloud/v1/surah/$surahNumber/editions/quran-uthmani,en.asad',
-  );
-  final editions = res.data['data'] as List;
-  final arabic = (editions[0]['ayahs'] as List);
-  final english = (editions[1]['ayahs'] as List);
-
-  return List.generate(arabic.length, (i) {
-    return AyahModel(
-      numberInSurah: (arabic[i]['numberInSurah'] as int),
-      text: arabic[i]['text'] as String,
-      translation: english[i]['text'] as String?,
-    );
-  });
-});
 
 class SurahReaderScreen extends ConsumerWidget {
   final SurahMeta surah;
@@ -108,6 +83,19 @@ class _AyahCardState extends State<_AyahCard> {
     setState(() => _isBookmarked = !_isBookmarked);
   }
 
+  void _showTafsir(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
+      builder: (ctx) => _TafsirSheet(
+        surah: widget.surahNumber,
+        ayah: widget.ayah.numberInSurah,
+        ayahText: widget.ayah.text,
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -138,6 +126,11 @@ class _AyahCardState extends State<_AyahCard> {
                     onPressed: _toggleBookmark,
                     icon: Icon(_isBookmarked ? Icons.bookmark : Icons.bookmark_border, color: AppColors.gold, size: 20),
                   ),
+                  IconButton(
+                    onPressed: () => _showTafsir(context),
+                    icon: const Icon(Icons.menu_book, color: AppColors.goldMuted, size: 20),
+                    tooltip: 'التفسير',
+                  ),
                   AyahAudioPlayer(
                     surahNumber: widget.surahNumber,
                     ayahNumber: widget.ayah.numberInSurah,
@@ -162,6 +155,47 @@ class _AyahCardState extends State<_AyahCard> {
               style: const TextStyle(color: AppColors.textOnDarkMuted, fontFamily: 'Inter', fontSize: 13, fontStyle: FontStyle.italic, height: 1.6),
             ),
           ],
+        ],
+      ),
+    );
+  }
+}
+
+class _TafsirSheet extends ConsumerWidget {
+  final int surah;
+  final int ayah;
+  final String ayahText;
+  const _TafsirSheet({required this.surah, required this.ayah, required this.ayahText});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final tafsirAsync = ref.watch(tafsirProvider((surah: surah, ayah: ayah)));
+
+    return Container(
+      padding: const EdgeInsets.all(AppDimensions.xl),
+      decoration: const BoxDecoration(
+        color: AppColors.navy,
+        borderRadius: BorderRadius.vertical(top: Radius.circular(AppDimensions.radiusXl)),
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(width: 40, height: 4, decoration: BoxDecoration(color: AppColors.gold.withOpacity(0.3), borderRadius: BorderRadius.circular(2))),
+          const SizedBox(height: AppDimensions.xl),
+          Text('سورة رقم $surah • آية رقم $ayah', style: const TextStyle(color: AppColors.gold, fontFamily: 'Amiri', fontSize: 14)),
+          const SizedBox(height: AppDimensions.md),
+          Text(ayahText, textAlign: TextAlign.center,
+            style: const TextStyle(color: Colors.white, fontFamily: 'Amiri', fontSize: 20, fontWeight: FontWeight.bold)),
+          const Divider(color: AppColors.goldMuted, height: 32),
+          const Text('التفسير الميسر', style: TextStyle(color: AppColors.gold, fontFamily: 'Amiri', fontSize: 18, fontWeight: FontWeight.bold)),
+          const SizedBox(height: AppDimensions.md),
+          tafsirAsync.when(
+            loading: () => const Padding(padding: EdgeInsets.symmetric(vertical: 32), child: CircularProgressIndicator(color: AppColors.gold)),
+            error: (_, __) => const Text('تعذر تحميل التفسير', style: TextStyle(color: Colors.red, fontFamily: 'Amiri')),
+            data: (tafsir) => Text(tafsir, textAlign: TextAlign.justify, textDirection: TextDirection.rtl,
+              style: const TextStyle(color: AppColors.textOnDark, fontFamily: 'Amiri', fontSize: 16, height: 1.6)),
+          ),
+          const SizedBox(height: AppDimensions.xl),
         ],
       ),
     );
