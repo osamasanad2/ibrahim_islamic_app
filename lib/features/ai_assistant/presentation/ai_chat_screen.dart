@@ -1,21 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../../core/ai/ai_config_providers.dart';
+import '../../../../core/ai/ai_provider.dart';
+import '../../../../core/ai/chat_message.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_dimensions.dart';
-import '../../../../core/di/providers.dart';
 import '../../../../core/storage/local_storage.dart';
-
-class ChatMessage {
-  final String content;
-  final bool isUser;
-  final DateTime timestamp;
-  const ChatMessage({required this.content, required this.isUser, required this.timestamp});
-}
-
-final geminiApiKeyProvider = StateProvider<String>((ref) {
-  final storage = LocalStorage();
-  return storage.getString('gemini_api_key', defaultValue: '');
-});
 
 class AiChatScreen extends ConsumerStatefulWidget {
   const AiChatScreen({super.key});
@@ -63,7 +53,24 @@ class _AiChatScreenState extends ConsumerState<AiChatScreen> {
     _scrollToBottom();
 
     try {
-      final reply = await _callGemini(text);
+      final apiKey = ref.read(aiApiKeyProvider);
+      final providerId = ref.read(selectedAiProviderId);
+      final model = ref.read(selectedAiModel);
+
+      final resolvedModel = model.isNotEmpty ? model : ref.read(currentAiProvider).defaultModel;
+
+      if (apiKey.isEmpty) {
+        throw Exception('API key not set');
+      }
+
+      final reply = await ref.read(aiServiceProvider).generateResponse(
+        providerId: providerId,
+        model: resolvedModel,
+        apiKey: apiKey,
+        messages: _messages.where((m) => m != _messages.last || !m.isUser).toList(),
+        systemPrompt: _systemPrompt,
+      );
+
       if (mounted) {
         setState(() {
           _messages.add(ChatMessage(content: reply, isUser: false, timestamp: DateTime.now()));
@@ -85,24 +92,6 @@ class _AiChatScreenState extends ConsumerState<AiChatScreen> {
     }
   }
 
-  Future<String> _callGemini(String userMessage) async {
-    final apiKey = ref.read(geminiApiKeyProvider);
-    if (apiKey.isEmpty) {
-      throw Exception('API key not set');
-    }
-    final dio = ref.read(dioProvider);
-    final response = await dio.post(
-      'https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=$apiKey',
-      data: {
-        'contents': [
-          {'parts': [{'text': '$_systemPrompt\n\nالمستخدم: $userMessage'}]}
-        ],
-      },
-    );
-    final candidates = response.data['candidates'] as List;
-    return candidates[0]['content']['parts'][0]['text'] as String;
-  }
-
   void _scrollToBottom() {
     Future.delayed(const Duration(milliseconds: 100), () {
       if (_scrollCtrl.hasClients) {
@@ -115,34 +104,119 @@ class _AiChatScreenState extends ConsumerState<AiChatScreen> {
     });
   }
 
-  void _showApiKeyDialog() {
-    final ctrl = TextEditingController(text: ref.read(geminiApiKeyProvider));
+  void _showSettingsDialog() {
+    final storage = LocalStorage();
+    final providerId = ref.read(selectedAiProviderId);
+    final provider = ref.read(currentAiProvider);
+
+    final apiCtrl = TextEditingController(text: ref.read(aiApiKeyProvider));
+    String tempProvider = providerId;
+    String tempModel = ref.read(selectedAiModel).isNotEmpty
+        ? ref.read(selectedAiModel)
+        : provider.defaultModel;
+
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        backgroundColor: AppColors.navy,
-        title: const Text('مفتاح API', textAlign: TextAlign.center, style: TextStyle(color: AppColors.gold, fontFamily: 'Amiri')),
-        content: TextField(
-          controller: ctrl,
-          textDirection: TextDirection.ltr,
-          style: const TextStyle(color: Colors.white, fontSize: 12),
-          decoration: const InputDecoration(
-            hintText: 'أدخل مفتاح Gemini API',
-            hintStyle: TextStyle(color: Colors.white30, fontSize: 12),
-            enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: AppColors.goldMuted)),
-          ),
-        ),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(context), child: const Text('إلغاء', style: TextStyle(color: Colors.white70))),
-          TextButton(
-            onPressed: () {
-              ref.read(geminiApiKeyProvider.notifier).state = ctrl.text;
-              LocalStorage().saveString('gemini_api_key', ctrl.text);
-              Navigator.pop(context);
-            },
-            child: const Text('حفظ', style: TextStyle(color: AppColors.gold)),
-          ),
-        ],
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, setDialogState) {
+          final currentProv = ref.read(aiServiceProvider).getProvider(tempProvider);
+          final models = currentProv.availableModels;
+
+          return AlertDialog(
+            backgroundColor: AppColors.navy,
+            title: const Text('إعدادات الذكاء الاصطناعي', textAlign: TextAlign.center,
+              style: TextStyle(color: AppColors.gold, fontFamily: 'Amiri', fontSize: 18)),
+            content: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text('مزود الخدمة', style: TextStyle(color: AppColors.gold, fontFamily: 'Amiri', fontSize: 14)),
+                  const SizedBox(height: 8),
+                  DropdownButtonFormField<String>(
+                    value: tempProvider,
+                    dropdownColor: AppColors.navyLight,
+                    style: const TextStyle(color: Colors.white, fontFamily: 'Amiri'),
+                    decoration: _fieldDeco(),
+                    items: ref.read(aiServiceProvider).allProviders.map((p) => DropdownMenuItem(
+                      value: p.id,
+                      child: Text(p.displayName, style: const TextStyle(fontSize: 13)),
+                    )).toList(),
+                    onChanged: (v) {
+                      if (v != null) {
+                        setDialogState(() {
+                          tempProvider = v;
+                          tempModel = ref.read(aiServiceProvider).getProvider(v).defaultModel;
+                        });
+                      }
+                    },
+                  ),
+                  const SizedBox(height: 16),
+                  const Text('النموذج', style: TextStyle(color: AppColors.gold, fontFamily: 'Amiri', fontSize: 14)),
+                  const SizedBox(height: 8),
+                  DropdownButtonFormField<String>(
+                    value: models.contains(tempModel) ? tempModel : currentProv.defaultModel,
+                    dropdownColor: AppColors.navyLight,
+                    style: const TextStyle(color: Colors.white, fontFamily: 'Amiri', fontSize: 12),
+                    decoration: _fieldDeco(),
+                    items: models.map((m) => DropdownMenuItem(
+                      value: m,
+                      child: Text(m, style: const TextStyle(fontSize: 12)),
+                    )).toList(),
+                    onChanged: (v) {
+                      if (v != null) setDialogState(() => tempModel = v);
+                    },
+                  ),
+                  const SizedBox(height: 16),
+                  Text(currentProv.apiKeyLabel, style: const TextStyle(color: AppColors.gold, fontFamily: 'Amiri', fontSize: 14)),
+                  const SizedBox(height: 8),
+                  TextField(
+                    controller: apiCtrl,
+                    textDirection: TextDirection.ltr,
+                    style: const TextStyle(color: Colors.white, fontSize: 12),
+                    decoration: InputDecoration(
+                      hintText: currentProv.apiKeyLabel,
+                      hintStyle: const TextStyle(color: Colors.white30, fontSize: 12),
+                      filled: true,
+                      fillColor: AppColors.navyLight,
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide.none,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            actions: [
+              TextButton(onPressed: () => Navigator.pop(ctx),
+                child: const Text('إلغاء', style: TextStyle(color: Colors.white70))),
+              TextButton(
+                onPressed: () {
+                  ref.read(selectedAiProviderId.notifier).state = tempProvider;
+                  ref.read(selectedAiModel.notifier).state = tempModel;
+                  ref.read(aiApiKeyProvider.notifier).state = apiCtrl.text;
+                  storage.saveString('ai_provider', tempProvider);
+                  storage.saveString('ai_model_$tempProvider', tempModel);
+                  storage.saveString('ai_key_$tempProvider', apiCtrl.text);
+                  Navigator.pop(ctx);
+                },
+                child: const Text('حفظ', style: TextStyle(color: AppColors.gold)),
+              ),
+            ],
+          );
+        },
+      ),
+    );
+  }
+
+  InputDecoration _fieldDeco() {
+    return InputDecoration(
+      filled: true,
+      fillColor: AppColors.navyLight,
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: BorderSide.none,
       ),
     );
   }
@@ -164,7 +238,7 @@ class _AiChatScreenState extends ConsumerState<AiChatScreen> {
         actions: [
           IconButton(
             icon: const Icon(Icons.settings, color: AppColors.gold),
-            onPressed: _showApiKeyDialog,
+            onPressed: _showSettingsDialog,
           ),
         ],
       ),
@@ -207,14 +281,25 @@ class _AiChatScreenState extends ConsumerState<AiChatScreen> {
           ),
           const SizedBox(height: AppDimensions.lg),
           Consumer(builder: (context, ref, _) {
-            final hasKey = ref.watch(geminiApiKeyProvider).isNotEmpty;
-            return TextButton.icon(
-              onPressed: _showApiKeyDialog,
-              icon: Icon(hasKey ? Icons.check_circle : Icons.key, color: hasKey ? AppColors.success : AppColors.gold),
-              label: Text(
-                hasKey ? 'مفتاح API مضبوط ✓' : 'إعداد مفتاح API',
-                style: TextStyle(color: hasKey ? AppColors.success : AppColors.gold, fontFamily: 'Amiri', fontSize: 14),
-              ),
+            final hasKey = ref.watch(aiApiKeyProvider).isNotEmpty;
+            final providerName = ref.watch(currentAiProvider).displayName;
+            final model = ref.watch(selectedAiModel).isNotEmpty
+                ? ref.watch(selectedAiModel)
+                : ref.watch(currentAiProvider).defaultModel;
+            return Column(
+              children: [
+                TextButton.icon(
+                  onPressed: _showSettingsDialog,
+                  icon: Icon(hasKey ? Icons.check_circle : Icons.key, color: hasKey ? AppColors.success : AppColors.gold),
+                  label: Text(
+                    hasKey ? 'مضبوط ✓' : 'إعداد المفتاح',
+                    style: TextStyle(color: hasKey ? AppColors.success : AppColors.gold, fontFamily: 'Amiri', fontSize: 14),
+                  ),
+                ),
+                if (hasKey)
+                  Text('$providerName — $model',
+                    style: const TextStyle(color: AppColors.textOnDarkMuted, fontFamily: 'Inter', fontSize: 11)),
+              ],
             );
           }),
         ],
