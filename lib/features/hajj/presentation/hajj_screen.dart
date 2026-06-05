@@ -12,7 +12,10 @@ class HajjScreen extends StatelessWidget {
       {'title': 'الطواف', 'desc': 'سبعة أشواط حول الكعبة المشرفة.'},
       {'title': 'السعي', 'desc': 'سبعة أشواط بين الصفا والمروة.'},
       {'title': 'يوم التروية', 'desc': 'الذهاب إلى منى في الثامن من ذي الحجة.'},
-      {'title': 'الوقوف بعرفة', 'desc': 'أعظم أركان الحج في التاسع من ذي الحجة.'},
+      {
+        'title': 'الوقوف بعرفة',
+        'desc': 'أعظم أركان الحج في التاسع من ذي الحجة.'
+      },
       {'title': 'المزدلفة', 'desc': 'المبيت بها بعد الانصراف من عرفة.'},
       {'title': 'رمي الجمار', 'desc': 'رمي جمرة العقبة الكبرى يوم العيد.'},
     ];
@@ -40,7 +43,9 @@ class HajjScreen extends StatelessWidget {
               children: [
                 CircleAvatar(
                   backgroundColor: AppColors.gold,
-                  child: Text('${i + 1}', style: const TextStyle(color: AppColors.navy, fontWeight: FontWeight.bold)),
+                  child: Text('${i + 1}',
+                      style: const TextStyle(
+                          color: AppColors.navy, fontWeight: FontWeight.bold)),
                 ),
                 const SizedBox(width: 16),
                 Expanded(
@@ -49,12 +54,19 @@ class HajjScreen extends StatelessWidget {
                     children: [
                       Text(
                         steps[i]['title']!,
-                        style: const TextStyle(color: AppColors.gold, fontFamily: 'Amiri', fontSize: 18, fontWeight: FontWeight.bold),
+                        style: const TextStyle(
+                            color: AppColors.gold,
+                            fontFamily: 'Amiri',
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold),
                       ),
                       const SizedBox(height: 4),
                       Text(
                         steps[i]['desc']!,
-                        style: const TextStyle(color: AppColors.textOnDarkMuted, fontFamily: 'Amiri', fontSize: 14),
+                        style: const TextStyle(
+                            color: AppColors.textOnDarkMuted,
+                            fontFamily: 'Amiri',
+                            fontSize: 14),
                       ),
                     ],
                   ),

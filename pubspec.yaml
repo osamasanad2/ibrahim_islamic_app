@@ -81,6 +81,7 @@ flutter:
     - assets/hadith/
     - assets/images/
     - assets/names/
+    - assets/mushaf/
 
   fonts:
     - family: Amiri

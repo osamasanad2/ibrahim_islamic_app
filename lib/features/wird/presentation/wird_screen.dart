@@ -88,9 +88,9 @@ class WirdScreen extends ConsumerWidget {
                 margin: const EdgeInsets.only(bottom: AppDimensions.sm),
                 padding: const EdgeInsets.all(AppDimensions.lg),
                 decoration: BoxDecoration(
-                  color: item.isDone ? AppColors.success.withOpacity(0.1) : AppColors.navyLight,
+                  color: item.isDone ? AppColors.success.withValues(alpha: 0.1) : AppColors.navyLight,
                   borderRadius: BorderRadius.circular(AppDimensions.radiusLg),
-                  border: Border.all(color: item.isDone ? AppColors.success.withOpacity(0.4) : AppColors.goldMuted),
+                  border: Border.all(color: item.isDone ? AppColors.success.withValues(alpha: 0.4) : AppColors.goldMuted),
                 ),
                 child: Row(
                   children: [

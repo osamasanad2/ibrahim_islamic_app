@@ -1,11 +1,8 @@
-import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_dimensions.dart';
 import '../../../data/quran/quran_providers.dart';
-import '../../../core/utils/mushaf_cache.dart';
 import '../../../core/storage/local_storage.dart';
 
 class QuranMushafScreen extends ConsumerStatefulWidget {
@@ -21,14 +18,19 @@ class _QuranMushafScreenState extends ConsumerState<QuranMushafScreen> {
   int _currentPage = 1;
   final _storage = LocalStorage();
   bool _showControls = true;
+  bool _isNightMode = false;
+  int _bookmarkedPage = 0;
+  int _sessionResumePage = 1;
 
   @override
   void initState() {
     super.initState();
     final lastPage = _storage.getQuranPage();
     _currentPage = widget.initialPage > 0 ? widget.initialPage : lastPage;
+    _sessionResumePage = _currentPage;
     _pageController = PageController(initialPage: _currentPage - 1);
-    ref.read(mushafDownloadProgressProvider.notifier).checkStatus();
+    _isNightMode = _storage.getBool('mushaf_night_mode', defaultValue: false);
+    _bookmarkedPage = _storage.getQuranBookmark();
   }
 
   @override
@@ -41,12 +43,43 @@ class _QuranMushafScreenState extends ConsumerState<QuranMushafScreen> {
     _storage.saveQuranPage(page);
   }
 
+  void _toggleNightMode() {
+    setState(() {
+      _isNightMode = !_isNightMode;
+      _storage.saveBool('mushaf_night_mode', _isNightMode);
+    });
+  }
+
+  void _onPageChanged(int idx) {
+    final page = idx + 1;
+    setState(() => _currentPage = page);
+    _saveLastPage(page);
+  }
+
+  void _goToNextPage() {
+    if (_currentPage < 604) {
+      _pageController.animateToPage(
+        _currentPage,
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeInOut,
+      );
+    }
+  }
+
+  void _goToPreviousPage() {
+    if (_currentPage > 1) {
+      _pageController.animateToPage(
+        _currentPage - 2,
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeInOut,
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    final dlState = ref.watch(mushafDownloadProgressProvider);
-
     return Scaffold(
-      backgroundColor: const Color(0xFFFDF7E7),
+      backgroundColor: _isNightMode ? const Color(0xFF121212) : const Color(0xFFFDF7E7),
       body: Stack(
         children: [
           GestureDetector(
@@ -55,16 +88,70 @@ class _QuranMushafScreenState extends ConsumerState<QuranMushafScreen> {
               controller: _pageController,
               itemCount: 604,
               reverse: true,
-              onPageChanged: (idx) {
-                setState(() => _currentPage = idx + 1);
-                _saveLastPage(idx + 1);
-              },
-              itemBuilder: (context, idx) => _MushafPage(pageNumber: idx + 1),
+              onPageChanged: _onPageChanged,
+              itemBuilder: (context, idx) => _MushafPage(
+                pageNumber: idx + 1,
+                isNightMode: _isNightMode,
+              ),
             ),
           ),
+          _buildSideArrows(),
           if (_showControls) _buildTopBar(),
-          if (_showControls) _buildBottomBar(dlState),
+          if (_showControls) _buildBottomBar(),
         ],
+      ),
+    );
+  }
+
+  Widget _buildSideArrows() {
+    return Positioned.fill(
+      child: IgnorePointer(
+        ignoring: !_showControls,
+        child: AnimatedOpacity(
+          opacity: _showControls ? 1.0 : 0.0,
+          duration: const Duration(milliseconds: 200),
+          child: Row(
+            children: [
+              GestureDetector(
+                onTap: _currentPage > 1 ? _goToPreviousPage : null,
+                child: Container(
+                  width: 56,
+                  alignment: Alignment.center,
+                  child: _currentPage > 1
+                      ? Container(
+                          width: 44,
+                          height: 44,
+                          decoration: BoxDecoration(
+                            color: Colors.black26,
+                            borderRadius: BorderRadius.circular(22),
+                          ),
+                          child: const Icon(Icons.navigate_before, color: Colors.white, size: 28),
+                        )
+                      : null,
+                ),
+              ),
+              const Expanded(child: SizedBox()),
+              GestureDetector(
+                onTap: _currentPage < 604 ? _goToNextPage : null,
+                child: Container(
+                  width: 56,
+                  alignment: Alignment.center,
+                  child: _currentPage < 604
+                      ? Container(
+                          width: 44,
+                          height: 44,
+                          decoration: BoxDecoration(
+                            color: Colors.black26,
+                            borderRadius: BorderRadius.circular(22),
+                          ),
+                          child: const Icon(Icons.navigate_next, color: Colors.white, size: 28),
+                        )
+                      : null,
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
@@ -76,7 +163,7 @@ class _QuranMushafScreenState extends ConsumerState<QuranMushafScreen> {
         padding: EdgeInsets.only(top: MediaQuery.of(context).padding.top, bottom: 8),
         decoration: BoxDecoration(
           gradient: LinearGradient(
-            colors: [Colors.black.withValues(alpha: 0.6), Colors.transparent],
+            colors: [Colors.black.withValues(alpha: 0.7), Colors.transparent],
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
           ),
@@ -87,13 +174,27 @@ class _QuranMushafScreenState extends ConsumerState<QuranMushafScreen> {
               icon: const Icon(Icons.arrow_back, color: Colors.white),
               onPressed: () => Navigator.pop(context),
             ),
+            IconButton(
+              icon: Icon(_isNightMode ? Icons.light_mode : Icons.dark_mode, color: Colors.white),
+              onPressed: _toggleNightMode,
+              tooltip: 'الوضع الليلي',
+            ),
+            if (_bookmarkedPage > 0)
+              IconButton(
+                icon: const Icon(Icons.bookmark, color: AppColors.gold),
+                onPressed: () {
+                  _pageController.jumpToPage(_bookmarkedPage - 1);
+                },
+                tooltip: 'الانتقال للعلامة المحفوظة',
+              ),
             const Spacer(),
             Text('صفحة $_currentPage',
               style: const TextStyle(color: Colors.white, fontFamily: 'Amiri', fontSize: 18, fontWeight: FontWeight.bold)),
             const Spacer(),
             IconButton(
-              icon: const Icon(Icons.list_alt, color: Colors.white),
-              onPressed: () => _showJumpToPage(context),
+              icon: const Icon(Icons.format_list_bulleted, color: Colors.white),
+              onPressed: () => _showIndexSheet(context),
+              tooltip: 'الفهرس',
             ),
           ],
         ),
@@ -101,14 +202,15 @@ class _QuranMushafScreenState extends ConsumerState<QuranMushafScreen> {
     );
   }
 
-  Widget _buildBottomBar(AsyncValue<int?> dlState) {
+  Widget _buildBottomBar() {
+    final showResume = _currentPage != _sessionResumePage;
     return Positioned(
       bottom: 0, left: 0, right: 0,
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 12),
         decoration: BoxDecoration(
           gradient: LinearGradient(
-            colors: [Colors.transparent, Colors.black.withValues(alpha: 0.4)],
+            colors: [Colors.transparent, Colors.black.withValues(alpha: 0.6)],
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
           ),
@@ -118,52 +220,59 @@ class _QuranMushafScreenState extends ConsumerState<QuranMushafScreen> {
           children: [
             Text('$_currentPage / 604',
               style: const TextStyle(color: Colors.white, fontFamily: 'Inter', fontSize: 14)),
-            TextButton.icon(
-              onPressed: () => _showPageTafsirList(context, _currentPage),
-              icon: const Icon(Icons.menu_book, color: AppColors.gold, size: 18),
-              label: const Text('التفسير', style: TextStyle(color: AppColors.gold, fontFamily: 'Amiri', fontSize: 14)),
+            if (showResume)
+              TextButton.icon(
+                onPressed: () {
+                  _pageController.jumpToPage(_sessionResumePage - 1);
+                },
+                icon: const Icon(Icons.history, color: AppColors.gold, size: 18),
+                label: Text('العودة لآخر تصفح ($_sessionResumePage)',
+                  style: const TextStyle(color: AppColors.gold, fontFamily: 'Amiri', fontSize: 13)),
+              ),
+            if (!showResume)
+              TextButton.icon(
+                onPressed: () => _showPageTafsirList(context, _currentPage),
+                icon: const Icon(Icons.menu_book, color: AppColors.gold, size: 18),
+                label: const Text('التفسير والمعاني', style: TextStyle(color: AppColors.gold, fontFamily: 'Amiri', fontSize: 14)),
+              ),
+            IconButton(
+              icon: Icon(
+                _bookmarkedPage == _currentPage ? Icons.bookmark : Icons.bookmark_add_outlined,
+                color: _bookmarkedPage == _currentPage ? AppColors.gold : Colors.white,
+              ),
+              tooltip: 'حفظ كعلامة',
+              onPressed: () {
+                setState(() {
+                  _bookmarkedPage = _currentPage;
+                  _sessionResumePage = _currentPage;
+                  _storage.saveQuranBookmark(_currentPage);
+                });
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('تم حفظ الصفحة كعلامة بنجاح', style: TextStyle(fontFamily: 'Amiri')),
+                    backgroundColor: AppColors.success,
+                    duration: Duration(seconds: 2),
+                  ),
+                );
+              },
             ),
-            _offlineBtn(dlState),
           ],
         ),
       ),
     );
   }
 
-  Widget _offlineBtn(AsyncValue<int?> dlState) {
-    return dlState.when(
-      data: (count) {
-        if (count == 604) {
-          return const Text('بدون إنترنت ✓', style: TextStyle(color: AppColors.success, fontFamily: 'Amiri', fontSize: 13));
-        }
-        return GestureDetector(
-          onTap: count == null || count == 0 ? _startDownload : null,
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(
-                Icons.download,
-                color: count != null && count > 0 ? AppColors.goldMuted : AppColors.gold,
-                size: 16,
-              ),
-              const SizedBox(width: 4),
-              Text(
-                count != null && count > 0 ? 'جاري ($count/604)' : 'تحميل',
-                style: TextStyle(
-                  color: count != null && count > 0 ? AppColors.goldMuted : AppColors.gold,
-                  fontFamily: 'Amiri',
-                  fontSize: 12,
-                ),
-              ),
-            ],
-          ),
-        );
-      },
-      loading: () => const SizedBox(
-        width: 20, height: 20,
-        child: CircularProgressIndicator(color: AppColors.gold, strokeWidth: 2),
+  void _showIndexSheet(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
+      builder: (context) => _IndexSheet(
+        onPageSelected: (page) {
+          Navigator.pop(context);
+          _pageController.jumpToPage(page - 1);
+        },
       ),
-      error: (_, __) => const Text('خطأ', style: TextStyle(color: Colors.red, fontFamily: 'Amiri', fontSize: 13)),
     );
   }
 
@@ -177,99 +286,41 @@ class _QuranMushafScreenState extends ConsumerState<QuranMushafScreen> {
       builder: (context) => _PageTafsirListSheet(ayahs: ayahs, pageNumber: page),
     );
   }
-
-  Future<void> _startDownload() async {
-    final shouldStart = await showDialog<bool>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        backgroundColor: AppColors.navy,
-        title: const Text('تحميل المصحف', textAlign: TextAlign.center,
-          style: TextStyle(color: AppColors.gold, fontFamily: 'Amiri', fontSize: 18)),
-        content: const Text('سيتم تحميل 604 صفحة للاستخدام بدون إنترنت. قد يستغرق هذا بضع دقائق.',
-          textAlign: TextAlign.center,
-          style: TextStyle(color: AppColors.textOnDark, fontFamily: 'Amiri', fontSize: 14)),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx, false),
-            child: const Text('إلغاء', style: TextStyle(color: Colors.white70))),
-          TextButton(onPressed: () => Navigator.pop(ctx, true),
-            child: const Text('ابدأ التحميل', style: TextStyle(color: AppColors.gold))),
-        ],
-      ),
-    );
-    if (shouldStart == true) {
-      ref.read(mushafDownloadProgressProvider.notifier).startDownload();
-    }
-  }
-
-  void _showJumpToPage(BuildContext context) {
-    final ctrl = TextEditingController();
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        backgroundColor: AppColors.navy,
-        title: const Text('انتقل إلى صفحة', textAlign: TextAlign.center, style: TextStyle(color: AppColors.gold, fontFamily: 'Amiri')),
-        content: TextField(
-          controller: ctrl,
-          keyboardType: TextInputType.number,
-          textAlign: TextAlign.center,
-          style: const TextStyle(color: Colors.white),
-          decoration: const InputDecoration(
-            hintText: '1 - 604',
-            hintStyle: TextStyle(color: Colors.white30),
-            enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: AppColors.goldMuted)),
-          ),
-        ),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(context), child: const Text('إلغاء', style: TextStyle(color: Colors.white70))),
-          TextButton(
-            onPressed: () {
-              final p = int.tryParse(ctrl.text);
-              if (p != null && p >= 1 && p <= 604) {
-                _pageController.jumpToPage(p - 1);
-                Navigator.pop(context);
-              }
-            },
-            child: const Text('انتقال', style: TextStyle(color: AppColors.gold)),
-          ),
-        ],
-      ),
-    );
-  }
 }
 
-class _MushafPage extends ConsumerWidget {
+class _MushafPage extends StatelessWidget {
   final int pageNumber;
-  const _MushafPage({required this.pageNumber});
-
-  static const String _baseUrl = 'https://raw.githubusercontent.com/QuranHub/quran-pages-images/main/easyquran.com/hafs-tajweed';
+  final bool isNightMode;
+  const _MushafPage({required this.pageNumber, required this.isNightMode});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    return FutureBuilder<String>(
-      future: ref.read(mushafCacheServiceProvider).getPagePath(pageNumber),
-      builder: (context, snapshot) {
-        final localPath = snapshot.data;
+  Widget build(BuildContext context) {
+    Widget image = Image.asset(
+      'assets/mushaf/page_$pageNumber.jpg',
+      fit: BoxFit.contain,
+      errorBuilder: (_, __, ___) => _imageFallback(),
+    );
 
-        return InteractiveViewer(
-          minScale: 1.0,
-          maxScale: 3.0,
-          child: Container(
-            color: const Color(0xFFFDF7E7),
-            child: localPath != null && File(localPath).existsSync()
-                ? Image.file(
-                    File(localPath),
-                    fit: BoxFit.contain,
-                    errorBuilder: (_, __, ___) => _imageFallback(),
-                  )
-                : CachedNetworkImage(
-                    imageUrl: '$_baseUrl/$pageNumber.jpg',
-                    fit: BoxFit.contain,
-                    placeholder: (_, __) => const Center(child: CircularProgressIndicator(color: AppColors.gold)),
-                    errorWidget: (_, __, ___) => _imageFallback(),
-                  ),
-          ),
-        );
-      },
+    if (isNightMode) {
+      // Invert colors matrix + slight color tuning for night mode
+      image = ColorFiltered(
+        colorFilter: const ColorFilter.matrix([
+          -1,  0,  0, 0, 255,
+           0, -1,  0, 0, 255,
+           0,  0, -1, 0, 255,
+           0,  0,  0, 1,   0,
+        ]),
+        child: image,
+      );
+    }
+
+    return InteractiveViewer(
+      minScale: 1.0,
+      maxScale: 3.0,
+      child: Container(
+        color: isNightMode ? const Color(0xFF121212) : const Color(0xFFFDF7E7),
+        child: image,
+      ),
     );
   }
 
@@ -279,18 +330,70 @@ class _MushafPage extends ConsumerWidget {
       children: [
         Container(
           width: 64, height: 64,
-          decoration: BoxDecoration(
+          decoration: const BoxDecoration(
             color: AppColors.goldMuted,
             shape: BoxShape.circle,
           ),
           child: const Icon(Icons.menu_book, color: AppColors.gold, size: 32),
         ),
         const SizedBox(height: 16),
-        Text('صفحة $pageNumber', style: const TextStyle(fontFamily: 'Amiri', fontSize: 18, fontWeight: FontWeight.bold)),
+        Text('صفحة $pageNumber', style: TextStyle(fontFamily: 'Amiri', fontSize: 18, fontWeight: FontWeight.bold, color: isNightMode ? Colors.white : Colors.black)),
         const SizedBox(height: 8),
-        const Text('اضغط لتحميل المصحف للاستخدام بدون إنترنت',
+        const Text('الصفحة غير متاحة',
           style: TextStyle(fontFamily: 'Amiri', fontSize: 14, color: AppColors.textOnDarkMuted)),
       ],
+    );
+  }
+}
+
+class _IndexSheet extends ConsumerWidget {
+  final Function(int) onPageSelected;
+  const _IndexSheet({required this.onPageSelected});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final surahsAsync = ref.watch(surahListProvider);
+
+    return Container(
+      height: MediaQuery.of(context).size.height * 0.75,
+      decoration: const BoxDecoration(
+        color: AppColors.navy,
+        borderRadius: BorderRadius.vertical(top: Radius.circular(AppDimensions.radiusXl)),
+      ),
+      child: Column(
+        children: [
+          const SizedBox(height: 12),
+          Container(width: 40, height: 4, decoration: BoxDecoration(color: Colors.white30, borderRadius: BorderRadius.circular(2))),
+          const SizedBox(height: 16),
+          const Text('فهرس السور', style: TextStyle(color: AppColors.gold, fontFamily: 'Amiri', fontSize: 20, fontWeight: FontWeight.bold)),
+          const Divider(color: AppColors.goldMuted, height: 32),
+          Expanded(
+            child: surahsAsync.when(
+              loading: () => const Center(child: CircularProgressIndicator(color: AppColors.gold)),
+              error: (_, __) => const Center(child: Text('خطأ في تحميل الفهرس', style: TextStyle(color: Colors.red))),
+              data: (surahs) => ListView.builder(
+                itemCount: surahs.length,
+                itemBuilder: (context, index) {
+                  final surah = surahs[index];
+                  return ListTile(
+                    leading: Container(
+                      width: 36, height: 36,
+                      decoration: BoxDecoration(shape: BoxShape.circle, border: Border.all(color: AppColors.goldMuted)),
+                      alignment: Alignment.center,
+                      child: Text('${surah.number}', style: const TextStyle(color: AppColors.gold, fontSize: 12)),
+                    ),
+                    title: Text(surah.nameArabic, style: const TextStyle(color: Colors.white, fontFamily: 'Amiri', fontSize: 18)),
+                    subtitle: Text('${surah.revelationType == 'Meccan' ? 'مكية' : 'مدنية'} • آياتها ${surah.ayahs}',
+                        style: const TextStyle(color: Colors.white54, fontSize: 12)),
+                    trailing: Text('صفحة ${surah.startPage}', style: const TextStyle(color: AppColors.gold, fontFamily: 'Amiri', fontSize: 14)),
+                    onTap: () => onPageSelected(surah.startPage),
+                  );
+                },
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
@@ -303,7 +406,7 @@ class _PageTafsirListSheet extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: MediaQuery.of(context).size.height * 0.7,
+      height: MediaQuery.of(context).size.height * 0.75,
       padding: const EdgeInsets.all(AppDimensions.lg),
       decoration: const BoxDecoration(
         color: AppColors.navy,
@@ -311,9 +414,9 @@ class _PageTafsirListSheet extends StatelessWidget {
       ),
       child: Column(
         children: [
-          Container(width: 40, height: 4, decoration: BoxDecoration(color: AppColors.gold.withValues(alpha: 0.3), borderRadius: BorderRadius.circular(2))),
+          Container(width: 40, height: 4, decoration: BoxDecoration(color: Colors.white30, borderRadius: BorderRadius.circular(2))),
           const SizedBox(height: AppDimensions.xl),
-          const Text('اختر الآية للتفسير', style: TextStyle(color: AppColors.gold, fontFamily: 'Amiri', fontSize: 18, fontWeight: FontWeight.bold)),
+          const Text('اختر الآية', style: TextStyle(color: AppColors.gold, fontFamily: 'Amiri', fontSize: 18, fontWeight: FontWeight.bold)),
           const Divider(color: AppColors.goldMuted, height: 32),
           Expanded(
             child: ListView.builder(
@@ -334,7 +437,7 @@ class _PageTafsirListSheet extends StatelessWidget {
                       context: context,
                       backgroundColor: Colors.transparent,
                       isScrollControlled: true,
-                      builder: (context) => _TafsirSheet(
+                      builder: (context) => _TafsirTabsSheet(
                         surah: a['surah']['number'], ayah: a['numberInSurah'], ayahText: a['text']),
                     );
                   },
@@ -348,40 +451,121 @@ class _PageTafsirListSheet extends StatelessWidget {
   }
 }
 
-class _TafsirSheet extends ConsumerWidget {
+class _TafsirTabsSheet extends StatefulWidget {
   final int surah;
   final int ayah;
   final String ayahText;
-  const _TafsirSheet({required this.surah, required this.ayah, required this.ayahText});
+  const _TafsirTabsSheet({required this.surah, required this.ayah, required this.ayahText});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final tafsirAsync = ref.watch(tafsirProvider((surah: surah, ayah: ayah)));
+  State<_TafsirTabsSheet> createState() => _TafsirTabsSheetState();
+}
+
+class _TafsirTabsSheetState extends State<_TafsirTabsSheet> with SingleTickerProviderStateMixin {
+  late TabController _tabController;
+
+  @override
+  void initState() {
+    super.initState();
+    _tabController = TabController(length: 3, vsync: this);
+  }
+
+  @override
+  void dispose() {
+    _tabController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(AppDimensions.xl),
+      height: MediaQuery.of(context).size.height * 0.8,
       decoration: const BoxDecoration(
         color: AppColors.navy,
         borderRadius: BorderRadius.vertical(top: Radius.circular(AppDimensions.radiusXl)),
       ),
       child: Column(
-        mainAxisSize: MainAxisSize.min,
         children: [
-          Container(width: 40, height: 4, decoration: BoxDecoration(color: AppColors.gold.withValues(alpha: 0.3), borderRadius: BorderRadius.circular(2))),
-          const SizedBox(height: AppDimensions.xl),
-          Text('سورة رقم $surah • آية رقم $ayah', style: const TextStyle(color: AppColors.gold, fontFamily: 'Amiri', fontSize: 14)),
-          const SizedBox(height: AppDimensions.md),
-          Text(ayahText, textAlign: TextAlign.center,
-            style: const TextStyle(color: Colors.white, fontFamily: 'Amiri', fontSize: 20, fontWeight: FontWeight.bold)),
-          const Divider(color: AppColors.goldMuted, height: 32),
-          const Text('التفسير الميسر', style: TextStyle(color: AppColors.gold, fontFamily: 'Amiri', fontSize: 18, fontWeight: FontWeight.bold)),
-          const SizedBox(height: AppDimensions.md),
-          tafsirAsync.when(
-            loading: () => const Padding(padding: EdgeInsets.symmetric(vertical: 32), child: CircularProgressIndicator(color: AppColors.gold)),
-            error: (_, __) => const Text('تعذر تحميل التفسير', style: TextStyle(color: Colors.red, fontFamily: 'Amiri')),
-            data: (tafsir) => Text(tafsir, textAlign: TextAlign.justify, textDirection: TextDirection.rtl,
-              style: const TextStyle(color: AppColors.textOnDark, fontFamily: 'Amiri', fontSize: 16, height: 1.6)),
+          const SizedBox(height: 12),
+          Container(width: 40, height: 4, decoration: BoxDecoration(color: Colors.white30, borderRadius: BorderRadius.circular(2))),
+          const SizedBox(height: 16),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: Text(widget.ayahText, textAlign: TextAlign.center,
+              style: const TextStyle(color: Colors.white, fontFamily: 'Amiri', fontSize: 20, fontWeight: FontWeight.bold)),
           ),
-          const SizedBox(height: AppDimensions.xl),
+          const SizedBox(height: 8),
+          Text('سورة رقم ${widget.surah} • آية رقم ${widget.ayah}', style: const TextStyle(color: AppColors.gold, fontFamily: 'Amiri', fontSize: 14)),
+          const SizedBox(height: 16),
+          TabBar(
+            controller: _tabController,
+            indicatorColor: AppColors.gold,
+            labelColor: AppColors.gold,
+            unselectedLabelColor: Colors.white54,
+            labelStyle: const TextStyle(fontFamily: 'Amiri', fontSize: 16, fontWeight: FontWeight.bold),
+            tabs: const [
+              Tab(text: 'التفسير الميسر'),
+              Tab(text: 'معاني الكلمات'),
+              Tab(text: 'أسباب النزول'),
+            ],
+          ),
+          Expanded(
+            child: TabBarView(
+              controller: _tabController,
+              children: [
+                _TafsirTab(surah: widget.surah, ayah: widget.ayah),
+                const _ComingSoonTab(title: 'معاني الكلمات', icon: Icons.translate),
+                const _ComingSoonTab(title: 'أسباب النزول', icon: Icons.history_edu),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _TafsirTab extends ConsumerWidget {
+  final int surah;
+  final int ayah;
+  const _TafsirTab({required this.surah, required this.ayah});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final tafsirAsync = ref.watch(tafsirProvider((surah: surah, ayah: ayah)));
+    return tafsirAsync.when(
+      loading: () => const Center(child: CircularProgressIndicator(color: AppColors.gold)),
+      error: (_, __) => const Center(child: Text('تعذر تحميل التفسير', style: TextStyle(color: Colors.red, fontFamily: 'Amiri'))),
+      data: (tafsir) => SingleChildScrollView(
+        padding: const EdgeInsets.all(24),
+        child: Text(
+          tafsir.isEmpty ? 'التفسير غير متاح حالياً' : tafsir,
+          textAlign: TextAlign.justify,
+          textDirection: TextDirection.rtl,
+          style: const TextStyle(color: AppColors.textOnDark, fontFamily: 'Amiri', fontSize: 18, height: 1.8),
+        ),
+      ),
+    );
+  }
+}
+
+class _ComingSoonTab extends StatelessWidget {
+  final String title;
+  final IconData icon;
+  const _ComingSoonTab({required this.title, required this.icon});
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(icon, color: AppColors.goldMuted, size: 64),
+          const SizedBox(height: 16),
+          Text(title, style: const TextStyle(color: AppColors.gold, fontFamily: 'Amiri', fontSize: 20, fontWeight: FontWeight.bold)),
+          const SizedBox(height: 8),
+          const Text('سيتم تفعيل هذه الميزة في التحديث القادم إن شاء الله',
+            style: TextStyle(color: Colors.white54, fontFamily: 'Amiri', fontSize: 16)),
         ],
       ),
     );

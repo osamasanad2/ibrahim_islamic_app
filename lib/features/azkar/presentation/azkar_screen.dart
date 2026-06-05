@@ -152,10 +152,10 @@ class _ZikrCardState extends State<_ZikrCard> {
         margin: const EdgeInsets.only(bottom: AppDimensions.md),
         padding: const EdgeInsets.all(AppDimensions.lg),
         decoration: BoxDecoration(
-          color: done ? AppColors.success.withOpacity(0.1) : AppColors.navyLight,
+          color: done ? AppColors.success.withValues(alpha: 0.1) : AppColors.navyLight,
           borderRadius: BorderRadius.circular(AppDimensions.radiusLg),
           border: Border.all(
-            color: done ? AppColors.success.withOpacity(0.5) : AppColors.goldMuted,
+            color: done ? AppColors.success.withValues(alpha: 0.5) : AppColors.goldMuted,
           ),
         ),
         child: Column(

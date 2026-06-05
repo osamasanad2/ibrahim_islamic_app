@@ -8,15 +8,15 @@ class QuickActionsGrid extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final actions = [
-      _QuickAction(icon: Icons.menu_book, label: 'المصحف', route: '/mushaf', color: const Color(0xFF4CAF50)),
+    const actions = <_QuickAction>[
+      _QuickAction(icon: Icons.menu_book, label: 'المصحف', route: '/mushaf', color: Color(0xFF4CAF50)),
       _QuickAction(icon: Icons.list_alt, label: 'السور', route: '/quran', color: AppColors.gold),
-      _QuickAction(icon: Icons.volunteer_activism, label: 'الدعاء', route: '/dua', color: const Color(0xFF9C27B0)),
-      _QuickAction(icon: Icons.explore, label: 'القبلة', route: '/qibla', color: const Color(0xFF2196F3)),
-      _QuickAction(icon: Icons.history_edu, label: 'الأحاديث', route: '/hadith', color: const Color(0xFFFF9800)),
-      _QuickAction(icon: Icons.calculate, label: 'الزكاة', route: '/zakat', color: const Color(0xFF00BCD4)),
-      _QuickAction(icon: Icons.calendar_month, label: 'التقويم', route: '/calendar', color: const Color(0xFFE91E63)),
-      _QuickAction(icon: Icons.track_changes, label: 'الرحلة', route: '/journey', color: const Color(0xFFFFC107)),
+      _QuickAction(icon: Icons.volunteer_activism, label: 'الدعاء', route: '/dua', color: Color(0xFF9C27B0)),
+      _QuickAction(icon: Icons.explore, label: 'القبلة', route: '/qibla', color: Color(0xFF2196F3)),
+      _QuickAction(icon: Icons.history_edu, label: 'الأحاديث', route: '/hadith', color: Color(0xFFFF9800)),
+      _QuickAction(icon: Icons.calculate, label: 'الزكاة', route: '/zakat', color: Color(0xFF00BCD4)),
+      _QuickAction(icon: Icons.calendar_month, label: 'التقويم', route: '/calendar', color: Color(0xFFE91E63)),
+      _QuickAction(icon: Icons.track_changes, label: 'الرحلة', route: '/journey', color: Color(0xFFFFC107)),
     ];
 
     return Column(
@@ -68,9 +68,9 @@ class _ActionItem extends StatelessWidget {
             width: 54,
             height: 54,
             decoration: BoxDecoration(
-              color: action.color.withOpacity(0.15),
+              color: action.color.withValues(alpha: 0.15),
               borderRadius: BorderRadius.circular(AppDimensions.radiusMd),
-              border: Border.all(color: action.color.withOpacity(0.3)),
+              border: Border.all(color: action.color.withValues(alpha: 0.3)),
             ),
             child: Icon(action.icon, color: action.color, size: 26),
           ),

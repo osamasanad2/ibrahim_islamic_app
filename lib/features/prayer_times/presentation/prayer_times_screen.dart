@@ -159,8 +159,8 @@ class _PrayerCard extends StatelessWidget {
     Color borderColor;
 
     if (isDone) {
-      bgColor = AppColors.success.withOpacity(0.1);
-      borderColor = AppColors.success.withOpacity(0.4);
+      bgColor = AppColors.success.withValues(alpha: 0.1);
+      borderColor = AppColors.success.withValues(alpha: 0.4);
     } else if (isActive) {
       bgColor = AppColors.goldMuted;
       borderColor = AppColors.gold;

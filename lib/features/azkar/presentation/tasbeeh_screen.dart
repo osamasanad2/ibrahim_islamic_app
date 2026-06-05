@@ -191,12 +191,12 @@ class _TasbeehScreenState extends State<TasbeehScreen>
                 width: 180,
                 height: 180,
                 margin: const EdgeInsets.only(bottom: AppDimensions.xxl),
-                decoration: BoxDecoration(
+                decoration: const BoxDecoration(
                   shape: BoxShape.circle,
-                  gradient: const RadialGradient(
+                  gradient: RadialGradient(
                     colors: [AppColors.goldLight, AppColors.gold],
                   ),
-                  boxShadow: const [
+                  boxShadow: [
                     BoxShadow(color: AppColors.goldMuted, blurRadius: 24, spreadRadius: 4),
                   ],
                 ),

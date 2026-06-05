@@ -19,12 +19,12 @@ class DailyVerseCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Icon(Icons.auto_stories, color: AppColors.gold, size: 16),
-              const SizedBox(width: AppDimensions.xs),
-              const Text(
+          const Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+              Icon(Icons.auto_stories, color: AppColors.gold, size: 16),
+              SizedBox(width: AppDimensions.xs),
+              Text(
                 'آية اليوم',
                 style: TextStyle(
                   color: AppColors.gold,

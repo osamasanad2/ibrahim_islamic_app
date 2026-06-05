@@ -244,7 +244,7 @@ class _DuaCard extends StatelessWidget {
                   fontSize: 13,
                 ),
               ),
-              Icon(Icons.bookmark_border, color: AppColors.textOnDarkMuted, size: 18),
+              const Icon(Icons.bookmark_border, color: AppColors.textOnDarkMuted, size: 18),
             ],
           ),
         ],

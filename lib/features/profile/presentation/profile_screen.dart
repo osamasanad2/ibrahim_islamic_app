@@ -113,7 +113,7 @@ class ProfileScreen extends ConsumerWidget {
           trailing: Switch(
             value: themeMode == ThemeMode.dark,
             onChanged: (_) => ref.read(themeModeNotifierProvider.notifier).toggleTheme(),
-            activeColor: AppColors.gold,
+            activeThumbColor: AppColors.gold,
           ),
         ),
         _buildMenuItem(
@@ -175,7 +175,7 @@ class ProfileScreen extends ConsumerWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Container(width: 40, height: 4, decoration: BoxDecoration(color: AppColors.gold.withOpacity(0.3), borderRadius: BorderRadius.circular(2))),
+            Container(width: 40, height: 4, decoration: BoxDecoration(color: AppColors.gold.withValues(alpha: 0.3), borderRadius: BorderRadius.circular(2))),
             const SizedBox(height: AppDimensions.lg),
             const Text('الإشارات', style: TextStyle(color: AppColors.gold, fontFamily: 'Amiri', fontSize: 22, fontWeight: FontWeight.w700)),
             const Divider(color: AppColors.goldMuted),

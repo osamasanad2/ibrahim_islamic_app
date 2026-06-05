@@ -5,7 +5,6 @@ import '../../../core/constants/app_dimensions.dart';
 import '../../../core/storage/local_storage.dart';
 import '../../../data/quran/quran_providers.dart';
 import '../../../data/quran/surah_meta.dart';
-import 'surah_reader_screen.dart';
 import 'quran_mushaf_screen.dart';
 
 class QuranScreen extends ConsumerStatefulWidget {
@@ -153,7 +152,7 @@ class _SurahTile extends StatelessWidget {
     return GestureDetector(
       onTap: () => Navigator.push(
         context,
-        MaterialPageRoute(builder: (_) => SurahReaderScreen(surah: surah)),
+        MaterialPageRoute(builder: (_) => QuranMushafScreen(initialPage: surah.startPage)),
       ),
       child: Container(
         margin: const EdgeInsets.only(bottom: AppDimensions.sm),
@@ -174,7 +173,7 @@ class _SurahTile extends StatelessWidget {
               decoration: BoxDecoration(
                 color: AppColors.goldMuted,
                 shape: BoxShape.circle,
-                border: Border.all(color: AppColors.gold.withOpacity(0.4)),
+                border: Border.all(color: AppColors.gold.withValues(alpha: 0.4)),
               ),
               child: Center(
                 child: Text(

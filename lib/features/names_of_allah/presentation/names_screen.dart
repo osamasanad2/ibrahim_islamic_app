@@ -175,7 +175,7 @@ class _NamesOfAllahScreenState extends State<NamesOfAllahScreen> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Container(width: 40, height: 4, decoration: BoxDecoration(color: AppColors.gold.withOpacity(0.3), borderRadius: BorderRadius.circular(2))),
+            Container(width: 40, height: 4, decoration: BoxDecoration(color: AppColors.gold.withValues(alpha: 0.3), borderRadius: BorderRadius.circular(2))),
             const SizedBox(height: AppDimensions.xl),
             Text(name.arabic, style: const TextStyle(color: AppColors.gold, fontFamily: 'Amiri', fontSize: 36, fontWeight: FontWeight.bold)),
             const SizedBox(height: AppDimensions.sm),

@@ -114,7 +114,7 @@ class _AyahCardState extends State<_AyahCard> {
             children: [
               Container(
                 width: 32, height: 32,
-                decoration: BoxDecoration(color: AppColors.goldMuted, shape: BoxShape.circle),
+                decoration: const BoxDecoration(color: AppColors.goldMuted, shape: BoxShape.circle),
                 child: Center(
                   child: Text('${widget.ayah.numberInSurah}',
                     style: const TextStyle(color: AppColors.gold, fontFamily: 'Inter', fontSize: 12, fontWeight: FontWeight.w700)),
@@ -180,7 +180,7 @@ class _TafsirSheet extends ConsumerWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Container(width: 40, height: 4, decoration: BoxDecoration(color: AppColors.gold.withOpacity(0.3), borderRadius: BorderRadius.circular(2))),
+          Container(width: 40, height: 4, decoration: BoxDecoration(color: AppColors.gold.withValues(alpha: 0.3), borderRadius: BorderRadius.circular(2))),
           const SizedBox(height: AppDimensions.xl),
           Text('سورة رقم $surah • آية رقم $ayah', style: const TextStyle(color: AppColors.gold, fontFamily: 'Amiri', fontSize: 14)),
           const SizedBox(height: AppDimensions.md),
@@ -192,8 +192,10 @@ class _TafsirSheet extends ConsumerWidget {
           tafsirAsync.when(
             loading: () => const Padding(padding: EdgeInsets.symmetric(vertical: 32), child: CircularProgressIndicator(color: AppColors.gold)),
             error: (_, __) => const Text('تعذر تحميل التفسير', style: TextStyle(color: Colors.red, fontFamily: 'Amiri')),
-            data: (tafsir) => Text(tafsir, textAlign: TextAlign.justify, textDirection: TextDirection.rtl,
-              style: const TextStyle(color: AppColors.textOnDark, fontFamily: 'Amiri', fontSize: 16, height: 1.6)),
+            data: (tafsir) => tafsir.isEmpty
+                ? const Text('غير متصل — التفسير غير متاح حالياً', style: TextStyle(color: AppColors.textOnDarkMuted, fontFamily: 'Amiri'))
+                : Text(tafsir, textAlign: TextAlign.justify, textDirection: TextDirection.rtl,
+                    style: const TextStyle(color: AppColors.textOnDark, fontFamily: 'Amiri', fontSize: 16, height: 1.6)),
           ),
           const SizedBox(height: AppDimensions.xl),
         ],

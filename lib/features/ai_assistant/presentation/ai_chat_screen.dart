@@ -133,6 +133,7 @@ class _AiChatScreenState extends ConsumerState<AiChatScreen> {
                   const Text('مزود الخدمة', style: TextStyle(color: AppColors.gold, fontFamily: 'Amiri', fontSize: 14)),
                   const SizedBox(height: 8),
                   DropdownButtonFormField<String>(
+                    // ignore: deprecated_member_use
                     value: tempProvider,
                     dropdownColor: AppColors.navyLight,
                     style: const TextStyle(color: Colors.white, fontFamily: 'Amiri'),
@@ -154,6 +155,7 @@ class _AiChatScreenState extends ConsumerState<AiChatScreen> {
                   const Text('النموذج', style: TextStyle(color: AppColors.gold, fontFamily: 'Amiri', fontSize: 14)),
                   const SizedBox(height: 8),
                   DropdownButtonFormField<String>(
+                    // ignore: deprecated_member_use
                     value: models.contains(tempModel) ? tempModel : currentProv.defaultModel,
                     dropdownColor: AppColors.navyLight,
                     style: const TextStyle(color: Colors.white, fontFamily: 'Amiri', fontSize: 12),
@@ -410,7 +412,7 @@ class _MessageBubble extends StatelessWidget {
             bottomLeft: message.isUser ? Radius.zero : const Radius.circular(AppDimensions.radiusLg),
             bottomRight: message.isUser ? const Radius.circular(AppDimensions.radiusLg) : Radius.zero,
           ),
-          border: Border.all(color: message.isUser ? AppColors.goldMuted : AppColors.gold.withOpacity(0.3)),
+          border: Border.all(color: message.isUser ? AppColors.goldMuted : AppColors.gold.withValues(alpha: 0.3)),
         ),
         child: Text(
           message.content,

@@ -51,7 +51,7 @@ class _QiblaScreenState extends State<QiblaScreen> {
 
     final dLng = (kaabaLng - lng) * pi / 180;
     final latRad = lat * pi / 180;
-    final kaabaLatRad = kaabaLat * pi / 180;
+    const kaabaLatRad = kaabaLat * pi / 180;
 
     final y = sin(dLng) * cos(kaabaLatRad);
     final x = cos(latRad) * sin(kaabaLatRad) -
@@ -97,7 +97,7 @@ class _QiblaScreenState extends State<QiblaScreen> {
           margin: const EdgeInsets.symmetric(horizontal: AppDimensions.lg),
           padding: const EdgeInsets.all(AppDimensions.md),
           decoration: BoxDecoration(
-            color: _aligned ? AppColors.success.withOpacity(0.2) : Colors.transparent,
+            color: _aligned ? AppColors.success.withValues(alpha: 0.2) : Colors.transparent,
             borderRadius: BorderRadius.circular(AppDimensions.radiusLg),
             border: Border.all(
               color: _aligned ? AppColors.success : Colors.transparent,
@@ -140,7 +140,7 @@ class _QiblaScreenState extends State<QiblaScreen> {
                 width: 56,
                 height: 56,
                 decoration: BoxDecoration(
-                  color: AppColors.gold.withOpacity(0.15),
+                  color: AppColors.gold.withValues(alpha: 0.15),
                   shape: BoxShape.circle,
                   border: Border.all(color: AppColors.gold, width: 2),
                 ),

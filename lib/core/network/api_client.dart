@@ -6,11 +6,14 @@ class ApiClient {
   factory ApiClient() => _instance;
   ApiClient._internal();
 
-  late final Dio dio;
+  late Dio dio;
+  bool _initialized = false;
 
   static const Duration _timeout = Duration(seconds: 30);
 
   void init({String? baseUrl}) {
+    if (_initialized) return;
+    _initialized = true;
     dio = Dio(
       BaseOptions(
         baseUrl: baseUrl ?? '',

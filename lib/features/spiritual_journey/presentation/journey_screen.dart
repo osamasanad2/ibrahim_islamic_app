@@ -41,7 +41,7 @@ class _SpiritualJourneyScreenState extends State<SpiritualJourneyScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final levels = SpiritualLevel.values;
+    const levels = SpiritualLevel.values;
 
     return Scaffold(
       backgroundColor: AppColors.navy,
@@ -225,7 +225,7 @@ class _LevelNode extends StatelessWidget {
               width: 44,
               height: 44,
               decoration: BoxDecoration(
-                color: isDone || isActive ? nodeColor.withOpacity(0.2) : AppColors.navyLight,
+                color: isDone || isActive ? nodeColor.withValues(alpha: 0.2) : AppColors.navyLight,
                 shape: BoxShape.circle,
                 border: Border.all(color: nodeColor, width: 2),
               ),
@@ -242,7 +242,7 @@ class _LevelNode extends StatelessWidget {
               Container(
                 width: 2,
                 height: 60,
-                color: isDone ? AppColors.success.withOpacity(0.4) : AppColors.goldMuted,
+                color: isDone ? AppColors.success.withValues(alpha: 0.4) : AppColors.goldMuted,
               ),
           ],
         ),

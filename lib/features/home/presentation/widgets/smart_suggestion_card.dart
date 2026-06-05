@@ -66,19 +66,19 @@ class SmartSuggestionCard extends StatelessWidget {
   _Suggestion _getSuggestion() {
     final hour = DateTime.now().hour;
     if (hour >= 4 && hour < 6) {
-      return _Suggestion('🌙', 'صلِّ ركعتي الفجر');
+      return const _Suggestion('🌙', 'صلِّ ركعتي الفجر');
     } else if (hour >= 6 && hour < 9) {
-      return _Suggestion('🌅', 'أذكار الصباح');
+      return const _Suggestion('🌅', 'أذكار الصباح');
     } else if (hour >= 12 && hour < 13) {
-      return _Suggestion('☀️', 'صلاة الظهر في وقتها');
+      return const _Suggestion('☀️', 'صلاة الظهر في وقتها');
     } else if (hour >= 15 && hour < 16) {
-      return _Suggestion('📖', 'اقرأ ورد القرآن');
+      return const _Suggestion('📖', 'اقرأ ورد القرآن');
     } else if (hour >= 18 && hour < 20) {
-      return _Suggestion('🌇', 'أذكار المساء');
+      return const _Suggestion('🌇', 'أذكار المساء');
     } else if (hour >= 20) {
-      return _Suggestion('⭐', 'قيام الليل');
+      return const _Suggestion('⭐', 'قيام الليل');
     }
-    return _Suggestion('🤲', 'تذكّر الله دائماً');
+    return const _Suggestion('🤲', 'تذكّر الله دائماً');
   }
 }
 

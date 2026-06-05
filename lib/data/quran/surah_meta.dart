@@ -5,6 +5,7 @@ class SurahMeta {
   final String nameTransliteration;
   final int ayahs;
   final String revelationType;
+  final int startPage;
 
   const SurahMeta({
     required this.number,
@@ -13,6 +14,7 @@ class SurahMeta {
     required this.nameTransliteration,
     required this.ayahs,
     required this.revelationType,
+    this.startPage = 1,
   });
 
   factory SurahMeta.fromJson(Map<String, dynamic> json) => SurahMeta(
@@ -22,5 +24,6 @@ class SurahMeta {
         nameTransliteration: json['name_transliteration'] as String,
         ayahs: json['ayahs'] as int,
         revelationType: json['revelation_type'] as String,
+        startPage: (json['start_page'] as int?) ?? 1,
       );
 }

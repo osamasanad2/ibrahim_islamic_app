@@ -30,7 +30,7 @@ class ContinueReadingCard extends StatelessWidget {
           ),
           borderRadius: BorderRadius.circular(AppDimensions.radiusLg),
           boxShadow: [
-            BoxShadow(color: Colors.black.withOpacity(0.2), blurRadius: 8, offset: const Offset(0, 4)),
+            BoxShadow(color: Colors.black.withValues(alpha: 0.2), blurRadius: 8, offset: const Offset(0, 4)),
           ],
         ),
         child: Row(
@@ -39,7 +39,7 @@ class ContinueReadingCard extends StatelessWidget {
               width: 48,
               height: 48,
               decoration: BoxDecoration(
-                color: AppColors.gold.withOpacity(0.2),
+                color: AppColors.gold.withValues(alpha: 0.2),
                 shape: BoxShape.circle,
               ),
               child: const Icon(Icons.menu_book, color: AppColors.gold),

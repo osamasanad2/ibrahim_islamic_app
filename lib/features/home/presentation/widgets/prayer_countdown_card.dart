@@ -70,10 +70,10 @@ class _PrayerCountdownCardState extends State<PrayerCountdownCard> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Row(
+            const Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Text(
+                Text(
                   'الصلاة القادمة',
                   style: TextStyle(
                     color: AppColors.navy,
@@ -82,7 +82,7 @@ class _PrayerCountdownCardState extends State<PrayerCountdownCard> {
                     fontWeight: FontWeight.w600,
                   ),
                 ),
-                const Icon(Icons.mosque, color: AppColors.navy, size: 20),
+                Icon(Icons.mosque, color: AppColors.navy, size: 20),
               ],
             ),
             const SizedBox(height: AppDimensions.sm),

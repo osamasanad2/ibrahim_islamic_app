@@ -15,7 +15,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   final PageController _pageController = PageController();
   int _currentPage = 0;
 
-  final List<_OnboardingStep> _steps = [
+  static const List<_OnboardingStep> _steps = [
     _OnboardingStep(
       icon: Icons.mosque,
       title: 'مرحباً بك في إبراهيم',

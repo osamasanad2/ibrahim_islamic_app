@@ -7,6 +7,8 @@ import 'surah_meta.dart';
 class QuranRepository {
   final Dio dio;
   List<SurahMeta>? _cachedSurahs;
+  List<dynamic>? _fullQuran;
+  Map<int, int>? _ayahOffsets;
 
   QuranRepository(this.dio);
 
@@ -19,7 +21,48 @@ class QuranRepository {
     return _cachedSurahs!;
   }
 
+  Future<void> _loadFullQuran() async {
+    if (_fullQuran != null) return;
+    final json = await rootBundle.loadString('assets/quran/quran_full.json');
+    _fullQuran = jsonDecode(json) as List;
+    _ayahOffsets = {};
+    int offset = 1;
+    for (final surah in _fullQuran!) {
+      final sn = surah['number'] as int;
+      final ayahs = surah['ayahs'] as List;
+      _ayahOffsets![sn] = offset;
+      offset += ayahs.length;
+    }
+  }
+
   Future<List<AyahModel>> getSurahContent(int surahNumber) async {
+    try {
+      return await _getSurahContentLocal(surahNumber);
+    } catch (_) {
+      return _getSurahContentApi(surahNumber);
+    }
+  }
+
+  Future<List<AyahModel>> _getSurahContentLocal(int surahNumber) async {
+    await _loadFullQuran();
+    final surah = _fullQuran!.firstWhere(
+      (s) => s['number'] == surahNumber,
+    ) as Map<String, dynamic>;
+    final ayahs = surah['ayahs'] as List;
+    final offset = _ayahOffsets![surahNumber]!;
+
+    return List.generate(ayahs.length, (i) {
+      return AyahModel(
+        numberInSurah: ayahs[i]['number'] as int,
+        numberInQuran: offset + i,
+        text: ayahs[i]['text'] as String,
+        translation: ayahs[i]['translation_en'] as String?,
+        surahNumber: surahNumber,
+      );
+    });
+  }
+
+  Future<List<AyahModel>> _getSurahContentApi(int surahNumber) async {
     final res = await dio.get(
       'https://api.alquran.cloud/v1/surah/$surahNumber/editions/quran-uthmani,en.asad',
     );
@@ -48,20 +91,28 @@ class QuranRepository {
   }
 
   Future<String> getTafsir(int surahNumber, int ayahNumber) async {
-    final res = await dio.get(
-      'https://api.alquran.cloud/v1/ayah/$surahNumber:$ayahNumber/ar.muyassar',
-    );
-    return res.data['data']['text'] as String;
+    try {
+      final res = await dio.get(
+        'https://api.alquran.cloud/v1/ayah/$surahNumber:$ayahNumber/ar.muyassar',
+      );
+      return res.data['data']['text'] as String;
+    } catch (_) {
+      return '';
+    }
   }
 
   Future<Map<String, dynamic>> getTafsirWithAyah(int surahNumber, int ayahNumber) async {
-    final res = await dio.get(
-      'https://api.alquran.cloud/v1/ayah/$surahNumber:$ayahNumber/ar.muyassar',
-    );
-    final data = res.data['data'] as Map<String, dynamic>;
-    return {
-      'tafsir': data['text'] as String,
-      'ayah': data['ayah'] ?? '',
-    };
+    try {
+      final res = await dio.get(
+        'https://api.alquran.cloud/v1/ayah/$surahNumber:$ayahNumber/ar.muyassar',
+      );
+      final data = res.data['data'] as Map<String, dynamic>;
+      return {
+        'tafsir': data['text'] as String,
+        'ayah': data['ayah'] ?? '',
+      };
+    } catch (_) {
+      return {'tafsir': '', 'ayah': ''};
+    }
   }
 }

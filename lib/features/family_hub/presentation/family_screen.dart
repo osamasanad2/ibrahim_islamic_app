@@ -172,7 +172,7 @@ class FamilyHubScreen extends StatelessWidget {
                     width: 24,
                     height: 24,
                     decoration: BoxDecoration(
-                      color: AppColors.gold.withOpacity(0.2),
+                      color: AppColors.gold.withValues(alpha: 0.2),
                       shape: BoxShape.circle,
                       border: Border.all(color: AppColors.gold, width: 1),
                     ),
@@ -196,7 +196,7 @@ class FamilyHubScreen extends StatelessWidget {
             borderRadius: BorderRadius.circular(AppDimensions.radiusFull),
             child: LinearProgressIndicator(
               value: progress,
-              backgroundColor: AppColors.gold.withOpacity(0.1),
+              backgroundColor: AppColors.gold.withValues(alpha: 0.1),
               valueColor: const AlwaysStoppedAnimation<Color>(AppColors.gold),
               minHeight: 8,
             ),
@@ -222,7 +222,7 @@ class FamilyHubScreen extends StatelessWidget {
       child: Row(
         children: [
           CircleAvatar(
-            backgroundColor: AppColors.gold.withOpacity(0.2),
+            backgroundColor: AppColors.gold.withValues(alpha: 0.2),
             child: Text(name[0], style: const TextStyle(color: AppColors.gold)),
           ),
           const SizedBox(width: AppDimensions.md),

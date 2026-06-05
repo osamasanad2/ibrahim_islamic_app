@@ -62,6 +62,16 @@ class LocalStorage {
     return box.get('quran_current_page', defaultValue: 1) as int;
   }
 
+  Future<void> saveQuranBookmark(int page) async {
+    final box = Hive.box(_progressBox);
+    await box.put('quran_bookmark_page', page);
+  }
+
+  int getQuranBookmark() {
+    final box = Hive.box(_progressBox);
+    return box.get('quran_bookmark_page', defaultValue: 0) as int;
+  }
+
   // ── Bookmarks ─────────────────────────────────────────────
   Future<void> addBookmark(String surahAyah) async {
     final box = Hive.box(_bookmarksBox);
