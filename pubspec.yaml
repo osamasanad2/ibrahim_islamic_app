@@ -51,6 +51,7 @@ dependencies:
   flutter_svg: ^2.0.10+1
   percent_indicator: ^4.2.3
   just_audio: ^0.9.40              # Quran audio
+  flutter_tts: ^4.0.0              # Azkar TTS
 
   # Utils
   intl: ^0.20.2

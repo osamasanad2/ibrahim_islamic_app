@@ -312,6 +312,19 @@ class HomeScreen extends ConsumerWidget {
           ),
           const Spacer(),
           GestureDetector(
+            onTap: () => context.push('/surah-audio'),
+            child: Container(
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: AppColors.navyLight,
+                borderRadius: BorderRadius.circular(AppDimensions.radiusMd),
+                border: Border.all(color: AppColors.goldMuted.withValues(alpha: 0.3)),
+              ),
+              child: const Icon(Icons.headphones, color: AppColors.gold, size: 22),
+            ),
+          ),
+          const SizedBox(width: AppDimensions.sm),
+          GestureDetector(
             onTap: () => context.push('/global-search'),
             child: Container(
               padding: const EdgeInsets.all(10),
