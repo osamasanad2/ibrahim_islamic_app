@@ -369,18 +369,18 @@ class _ActionChip extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
         decoration: BoxDecoration(
           color: AppColors.navyLight,
-          borderRadius: BorderRadius.circular(14),
-          border: Border.all(color: AppColors.goldMuted, width: 1),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: AppColors.goldMuted, width: 0.8),
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(icon, color: iconColor ?? AppColors.gold, size: 20),
-            const SizedBox(width: 8),
-            Text(label, style: const TextStyle(color: Colors.white, fontFamily: 'Amiri', fontSize: 16, fontWeight: FontWeight.bold)),
+            Icon(icon, color: iconColor ?? AppColors.gold, size: 14),
+            const SizedBox(width: 4),
+            Text(label, style: const TextStyle(color: Colors.white, fontFamily: 'Amiri', fontSize: 12, fontWeight: FontWeight.bold)),
           ],
         ),
       ),
