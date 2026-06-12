@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_dimensions.dart';
+import '../../../core/services/recent_activity_service.dart';
 
 class TasbeehScreen extends StatefulWidget {
   const TasbeehScreen({super.key});
@@ -30,6 +31,7 @@ class _TasbeehScreenState extends State<TasbeehScreen>
   @override
   void initState() {
     super.initState();
+    recordActivity(id: 'tasbeeh', title: 'المسبحة', subtitle: 'تسبيح', route: '/tasbeeh', icon: '📿');
     _scaleController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 100),

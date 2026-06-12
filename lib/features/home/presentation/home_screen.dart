@@ -16,6 +16,7 @@ import 'widgets/daily_verse_card.dart';
 import 'widgets/progress_tracker_row.dart';
 import 'widgets/quick_actions_grid.dart';
 import 'widgets/continue_reading_card.dart';
+import 'widgets/recent_activity_section.dart';
 
 final prayerScheduleProvider = FutureProvider<PrayerScheduleModel>((ref) async {
   final location = await ref.read(locationServiceProvider).getCurrentLocation();
@@ -147,6 +148,20 @@ class HomeScreen extends ConsumerWidget {
                   ),
                   const SizedBox(height: AppDimensions.md),
 
+                  // ========== PRAYER TIMES (تحت التاريخ مباشرة) ==========
+                  scheduleAsync.when(
+                    loading: () => const _LoadingCard(),
+                    error: (_, __) => const _LoadingCard(),
+                    data: (schedule) => Column(
+                      children: [
+                        PrayerCountdownCard(schedule: schedule),
+                        const SizedBox(height: AppDimensions.sm),
+                        PrayerTimesList(schedule: schedule),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: AppDimensions.md),
+
                   // ========== SUGGESTION OF THE DAY ==========
                   Container(
                     padding: const EdgeInsets.all(AppDimensions.lg),
@@ -198,26 +213,16 @@ class HomeScreen extends ConsumerWidget {
                   ),
                   if (hadithAsync.hasValue) const SizedBox(height: AppDimensions.md),
 
-                  // ========== PRAYER TIMES ==========
-                  scheduleAsync.when(
-                    loading: () => const _LoadingCard(),
-                    error: (_, __) => const _LoadingCard(),
-                    data: (schedule) => Column(
-                      children: [
-                        PrayerCountdownCard(schedule: schedule),
-                        const SizedBox(height: AppDimensions.sm),
-                        PrayerTimesList(schedule: schedule),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: AppDimensions.md),
-
                   // ========== CONTINUE READING ==========
                   const ContinueReadingCard(),
                   const SizedBox(height: AppDimensions.md),
 
                   // ========== QUICK ACTIONS ==========
                   const QuickActionsGrid(),
+                  const SizedBox(height: AppDimensions.md),
+
+                  // ========== RECENTLY USED ==========
+                  const RecentActivitySection(),
                   const SizedBox(height: AppDimensions.md),
 
                   // ========== PROGRESS ==========

@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../../../core/constants/app_colors.dart';
+import '../../../core/services/recent_activity_service.dart';
 
 enum UserMood { anxious, grateful, sad, happy, fearful, sick, tired, hopeful }
 
@@ -62,6 +63,7 @@ class _DuaScreenState extends State<DuaScreen> with TickerProviderStateMixin {
   @override
   void initState() {
     super.initState();
+    recordActivity(id: 'dua', title: 'الأدعية والأذكار', subtitle: 'من القرآن والسنة', route: '/dua', icon: '🤲');
     _loadDuas();
   }
 

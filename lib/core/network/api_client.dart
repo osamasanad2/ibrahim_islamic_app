@@ -46,7 +46,13 @@ class _ErrorInterceptor extends Interceptor {
       case DioExceptionType.receiveTimeout:
         err = DioException(
           requestOptions: err.requestOptions,
-          message: 'انتهت مهلة الاتصال. تحقق من اتصالك بالإنترنت.',
+          message: 'timeout_انتهت مهلة الاتصال',
+          type: err.type,
+        );
+      case DioExceptionType.connectionError:
+        err = DioException(
+          requestOptions: err.requestOptions,
+          message: 'connection_فشل الاتصال بالخادم',
           type: err.type,
         );
       case DioExceptionType.badResponse:
@@ -54,22 +60,24 @@ class _ErrorInterceptor extends Interceptor {
         if (statusCode == 429) {
           err = DioException(
             requestOptions: err.requestOptions,
-            message: 'طلبات كثيرة جداً. حاول لاحقاً.',
+            message: '429_طلبات كثيرة جداً',
+            type: err.type,
+          );
+        } else if (statusCode == 401 || statusCode == 403) {
+          err = DioException(
+            requestOptions: err.requestOptions,
+            message: '${statusCode}_المفتاح غير صالح',
             type: err.type,
           );
         } else if (statusCode != null && statusCode >= 500) {
           err = DioException(
             requestOptions: err.requestOptions,
-            message: 'خطأ في الخادم. حاول لاحقاً.',
+            message: '${statusCode}_خطأ في الخادم',
             type: err.type,
           );
         }
       default:
-        err = DioException(
-          requestOptions: err.requestOptions,
-          message: 'حدث خطأ غير متوقع. تحقق من اتصالك.',
-          type: err.type,
-        );
+        break;
     }
     handler.next(err);
   }

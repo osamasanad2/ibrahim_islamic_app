@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:hijri/hijri_calendar.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_dimensions.dart';
+import '../../../core/services/recent_activity_service.dart';
 
 class CalendarScreen extends StatefulWidget {
   const CalendarScreen({super.key});
@@ -25,6 +26,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
   @override
   void initState() {
     super.initState();
+    recordActivity(id: 'calendar', title: 'التقويم', subtitle: 'التقويم الهجري والميلادي', route: '/calendar', icon: '📅');
     _today = HijriCalendar.now();
   }
 

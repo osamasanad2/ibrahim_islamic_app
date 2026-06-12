@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_dimensions.dart';
+import '../../../core/services/recent_activity_service.dart';
 
 class NameModel {
   final int id;
@@ -42,6 +43,7 @@ class _NamesOfAllahScreenState extends State<NamesOfAllahScreen> {
   @override
   void initState() {
     super.initState();
+    recordActivity(id: 'names', title: 'أسماء الله الحسنى', subtitle: '99 اسماً', route: '/names', icon: 'ﷲ');
     _loadNames();
   }
 

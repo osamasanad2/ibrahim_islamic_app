@@ -38,15 +38,31 @@ class GeminiProvider extends AIProvider {
     }).toList();
 
     final response = await dio.post(
-      'https://generativelanguage.googleapis.com/v1beta/models/$model:generateContent?key=$apiKey',
+      'https://generativelanguage.googleapis.com/v1beta/models/$model:generateContent',
+      options: Options(headers: {
+        'x-goog-api-key': apiKey,
+        'Content-Type': 'application/json',
+      }),
       data: {
         'system_instruction': {
           'parts': [{'text': systemPrompt}]
         },
         'contents': contents,
+        'generationConfig': {
+          'maxOutputTokens': 4096,
+          'temperature': 0.7,
+        },
       },
     );
-    final candidates = response.data['candidates'] as List;
-    return candidates[0]['content']['parts'][0]['text'] as String;
+    final candidates = response.data['candidates'] as List?;
+    if (candidates == null || candidates.isEmpty) {
+      final blockReason = response.data['promptFeedback'];
+      throw Exception('تم حظر الرد: $blockReason');
+    }
+    final parts = candidates[0]['content']['parts'] as List?;
+    if (parts == null || parts.isEmpty) {
+      throw Exception('لم يتم استلام رد من النموذج');
+    }
+    return parts[0]['text'] as String;
   }
 }

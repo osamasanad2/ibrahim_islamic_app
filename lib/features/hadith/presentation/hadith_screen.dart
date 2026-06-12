@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_dimensions.dart';
+import '../../../core/services/recent_activity_service.dart';
 
 class HadithModel {
   final int id;
@@ -51,6 +52,7 @@ class _HadithScreenState extends State<HadithScreen> {
   @override
   void initState() {
     super.initState();
+    recordActivity(id: 'hadith', title: 'الأحاديث النبوية', subtitle: 'الأربعون النووية', route: '/hadith', icon: '📿');
     _load();
   }
 

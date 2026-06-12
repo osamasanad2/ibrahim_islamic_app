@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_dimensions.dart';
 import '../../../core/di/providers.dart';
+import '../../../core/services/recent_activity_service.dart';
 import '../../../core/utils/prayer_calculator.dart';
 import '../../../core/storage/local_storage.dart';
 
@@ -42,6 +43,11 @@ class PrayerTimesScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final scheduleAsync = ref.watch(prayerScheduleProvider);
+    ref.listen(prayerScheduleProvider, (prev, next) {
+      if (prev == null && next.hasValue) {
+        recordActivity(id: 'prayer-times', title: 'مواقيت الصلاة', subtitle: 'أوقات الصلاة اليوم', route: '/prayer-times', icon: '🕌');
+      }
+    });
 
     return Scaffold(
       backgroundColor: AppColors.navy,

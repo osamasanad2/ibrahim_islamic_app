@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_compass/flutter_compass.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_dimensions.dart';
+import '../../../core/services/recent_activity_service.dart';
 import '../../../core/utils/location_service.dart';
 
 class QiblaScreen extends StatefulWidget {
@@ -21,6 +22,7 @@ class _QiblaScreenState extends State<QiblaScreen> {
   @override
   void initState() {
     super.initState();
+    recordActivity(id: 'qibla', title: 'اتجاه القبلة', subtitle: '', route: '/qibla', icon: '🧭');
     _initQibla();
   }
 

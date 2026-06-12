@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_dimensions.dart';
+import '../../../core/services/recent_activity_service.dart';
 
 class Zikr {
   final int id;
@@ -52,6 +53,7 @@ class _AzkarScreenState extends State<AzkarScreen>
   void initState() {
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
+    recordActivity(id: 'azkar', title: 'الأذكار', subtitle: 'أذكار الصباح والمساء', route: '/azkar', icon: '🌅');
     _loadAzkar();
   }
 
