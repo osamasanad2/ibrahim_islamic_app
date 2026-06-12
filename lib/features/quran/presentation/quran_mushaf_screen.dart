@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_dimensions.dart';
+import '../../../core/services/recent_activity_service.dart';
 import '../../../data/quran/quran_providers.dart';
 import '../../../core/storage/local_storage.dart';
 
@@ -25,6 +26,7 @@ class _QuranMushafScreenState extends ConsumerState<QuranMushafScreen> {
   @override
   void initState() {
     super.initState();
+    recordActivity(id: 'mushaf', title: 'المصحف الشريف', subtitle: 'قراءة القرآن', route: '/mushaf', icon: '📖');
     final lastPage = _storage.getQuranPage();
     _currentPage = widget.initialPage > 0 ? widget.initialPage : lastPage;
     _sessionResumePage = _currentPage;
@@ -72,6 +74,23 @@ class _QuranMushafScreenState extends ConsumerState<QuranMushafScreen> {
         _currentPage - 2,
         duration: const Duration(milliseconds: 300),
         curve: Curves.easeInOut,
+      );
+    }
+  }
+
+  void _toggleBookmark() {
+    setState(() {
+      _bookmarkedPage = _bookmarkedPage == _currentPage ? 0 : _currentPage;
+      _sessionResumePage = _currentPage;
+      _storage.saveQuranBookmark(_bookmarkedPage);
+    });
+    if (_bookmarkedPage == _currentPage) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('تم حفظ الصفحة كعلامة مرجعية', style: TextStyle(fontFamily: 'Amiri')),
+          backgroundColor: AppColors.success,
+          duration: Duration(seconds: 2),
+        ),
       );
     }
   }
@@ -168,33 +187,53 @@ class _QuranMushafScreenState extends ConsumerState<QuranMushafScreen> {
             end: Alignment.bottomCenter,
           ),
         ),
-        child: Row(
+        child: Column(
           children: [
-            IconButton(
-              icon: const Icon(Icons.arrow_back, color: Colors.white),
-              onPressed: () => Navigator.pop(context),
+            Row(
+              children: [
+                IconButton(
+                  icon: const Icon(Icons.arrow_back, color: Colors.white),
+                  onPressed: () => Navigator.pop(context),
+                ),
+                IconButton(
+                  icon: Icon(_isNightMode ? Icons.light_mode : Icons.dark_mode, color: Colors.white),
+                  onPressed: _toggleNightMode,
+                  tooltip: 'الوضع الليلي',
+                ),
+                const Spacer(),
+                Text('صفحة $_currentPage',
+                  style: const TextStyle(color: Colors.white, fontFamily: 'Amiri', fontSize: 18, fontWeight: FontWeight.bold)),
+                const Spacer(),
+                IconButton(
+                  icon: const Icon(Icons.format_list_bulleted, color: Colors.white),
+                  onPressed: () => _showIndexSheet(context),
+                  tooltip: 'فهرس السور',
+                ),
+              ],
             ),
-            IconButton(
-              icon: Icon(_isNightMode ? Icons.light_mode : Icons.dark_mode, color: Colors.white),
-              onPressed: _toggleNightMode,
-              tooltip: 'الوضع الليلي',
-            ),
-            if (_bookmarkedPage > 0)
-              IconButton(
-                icon: const Icon(Icons.bookmark, color: AppColors.gold),
-                onPressed: () {
-                  _pageController.jumpToPage(_bookmarkedPage - 1);
-                },
-                tooltip: 'الانتقال للعلامة المحفوظة',
-              ),
-            const Spacer(),
-            Text('صفحة $_currentPage',
-              style: const TextStyle(color: Colors.white, fontFamily: 'Amiri', fontSize: 18, fontWeight: FontWeight.bold)),
-            const Spacer(),
-            IconButton(
-              icon: const Icon(Icons.format_list_bulleted, color: Colors.white),
-              onPressed: () => _showIndexSheet(context),
-              tooltip: 'الفهرس',
+            const SizedBox(height: 4),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                _ActionChip(
+                  icon: Icons.menu_book,
+                  label: 'التفسير',
+                  onTap: () => _showPageTafsir(context, _currentPage),
+                ),
+                const SizedBox(width: 12),
+                _ActionChip(
+                  icon: Icons.history_edu,
+                  label: 'أسباب النزول',
+                  onTap: () => _showPageTafsir(context, _currentPage),
+                ),
+                const SizedBox(width: 12),
+                _ActionChip(
+                  icon: _bookmarkedPage == _currentPage ? Icons.bookmark : Icons.bookmark_add_outlined,
+                  label: _bookmarkedPage == _currentPage ? 'محفوظة' : 'علامة مرجعية',
+                  iconColor: _bookmarkedPage == _currentPage ? AppColors.gold : Colors.white70,
+                  onTap: _toggleBookmark,
+                ),
+              ],
             ),
           ],
         ),
@@ -216,46 +255,67 @@ class _QuranMushafScreenState extends ConsumerState<QuranMushafScreen> {
           ),
         ),
         child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text('$_currentPage / 604',
-              style: const TextStyle(color: Colors.white, fontFamily: 'Inter', fontSize: 14)),
-            if (showResume)
-              TextButton.icon(
-                onPressed: () {
-                  _pageController.jumpToPage(_sessionResumePage - 1);
-                },
-                icon: const Icon(Icons.history, color: AppColors.gold, size: 18),
-                label: Text('العودة لآخر تصفح ($_sessionResumePage)',
-                  style: const TextStyle(color: AppColors.gold, fontFamily: 'Amiri', fontSize: 13)),
-              ),
-            if (!showResume)
-              TextButton.icon(
-                onPressed: () => _showPageTafsirList(context, _currentPage),
-                icon: const Icon(Icons.menu_book, color: AppColors.gold, size: 18),
-                label: const Text('التفسير والمعاني', style: TextStyle(color: AppColors.gold, fontFamily: 'Amiri', fontSize: 14)),
-              ),
-            IconButton(
-              icon: Icon(
-                _bookmarkedPage == _currentPage ? Icons.bookmark : Icons.bookmark_add_outlined,
-                color: _bookmarkedPage == _currentPage ? AppColors.gold : Colors.white,
-              ),
-              tooltip: 'حفظ كعلامة',
-              onPressed: () {
-                setState(() {
-                  _bookmarkedPage = _currentPage;
-                  _sessionResumePage = _currentPage;
-                  _storage.saveQuranBookmark(_currentPage);
-                });
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('تم حفظ الصفحة كعلامة بنجاح', style: TextStyle(fontFamily: 'Amiri')),
-                    backgroundColor: AppColors.success,
-                    duration: Duration(seconds: 2),
+            if (_currentPage > 1)
+              GestureDetector(
+                onTap: _goToPreviousPage,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  child: const Row(
+                    children: [
+                      Icon(Icons.navigate_before, color: Colors.white70, size: 20),
+                      Text('السابقة', style: TextStyle(color: Colors.white70, fontFamily: 'Amiri', fontSize: 14)),
+                    ],
                   ),
-                );
-              },
+                ),
+              ),
+            Container(
+              margin: const EdgeInsets.symmetric(horizontal: 16),
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 6),
+              decoration: BoxDecoration(
+                color: Colors.white12,
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: Text('$_currentPage / 604',
+                style: const TextStyle(color: Colors.white, fontFamily: 'Inter', fontSize: 14)),
             ),
+            if (_currentPage < 604)
+              GestureDetector(
+                onTap: _goToNextPage,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  child: const Row(
+                    children: [
+                      Text('التالي', style: TextStyle(color: Colors.white70, fontFamily: 'Amiri', fontSize: 14)),
+                      Icon(Icons.navigate_next, color: Colors.white70, size: 20),
+                    ],
+                  ),
+                ),
+              ),
+            if (showResume)
+              Padding(
+                padding: const EdgeInsets.only(right: 8),
+                child: GestureDetector(
+                  onTap: () => _pageController.jumpToPage(_sessionResumePage - 1),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    decoration: BoxDecoration(
+                      color: AppColors.gold.withValues(alpha: 0.2),
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(color: AppColors.goldMuted),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Icon(Icons.history, color: AppColors.gold, size: 16),
+                        const SizedBox(width: 4),
+                        Text('عودة ($_sessionResumePage)', style: const TextStyle(color: AppColors.gold, fontFamily: 'Amiri', fontSize: 13)),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
           ],
         ),
       ),
@@ -276,7 +336,7 @@ class _QuranMushafScreenState extends ConsumerState<QuranMushafScreen> {
     );
   }
 
-  Future<void> _showPageTafsirList(BuildContext context, int page) async {
+  Future<void> _showPageTafsir(BuildContext context, int page) async {
     final ayahs = await ref.read(pageAyahsProvider(page).future);
     if (!context.mounted) return;
     showModalBottomSheet(
@@ -284,6 +344,37 @@ class _QuranMushafScreenState extends ConsumerState<QuranMushafScreen> {
       backgroundColor: Colors.transparent,
       isScrollControlled: true,
       builder: (context) => _PageTafsirListSheet(ayahs: ayahs, pageNumber: page),
+    );
+  }
+}
+
+class _ActionChip extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final VoidCallback onTap;
+  final Color? iconColor;
+  const _ActionChip({required this.icon, required this.label, required this.onTap, this.iconColor});
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+        decoration: BoxDecoration(
+          color: Colors.white.withValues(alpha: 0.12),
+          borderRadius: BorderRadius.circular(24),
+          border: Border.all(color: Colors.white.withValues(alpha: 0.15)),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(icon, color: iconColor ?? Colors.white70, size: 16),
+            const SizedBox(width: 6),
+            Text(label, style: const TextStyle(color: Colors.white, fontFamily: 'Amiri', fontSize: 13)),
+          ],
+        ),
+      ),
     );
   }
 }
@@ -302,7 +393,6 @@ class _MushafPage extends StatelessWidget {
     );
 
     if (isNightMode) {
-      // Invert colors matrix + slight color tuning for night mode
       image = ColorFiltered(
         colorFilter: const ColorFilter.matrix([
           -1,  0,  0, 0, 255,
