@@ -12,30 +12,30 @@ class DailyVerseCard extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         color: AppColors.navyLight,
-        borderRadius: BorderRadius.circular(AppDimensions.radiusXl),
+        borderRadius: BorderRadius.circular(AppDimensions.radiusLg),
         border: Border.all(color: AppColors.goldMuted, width: 1),
       ),
-      padding: const EdgeInsets.all(AppDimensions.xl),
+      padding: const EdgeInsets.all(AppDimensions.md),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           const Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-              Icon(Icons.auto_stories, color: AppColors.gold, size: 16),
+              Icon(Icons.auto_stories, color: AppColors.gold, size: 14),
               SizedBox(width: AppDimensions.xs),
               Text(
                 'آية اليوم',
                 style: TextStyle(
                   color: AppColors.gold,
                   fontFamily: 'Inter',
-                  fontSize: 12,
+                  fontSize: 11,
                   fontWeight: FontWeight.w600,
                 ),
               ),
             ],
           ),
-          const SizedBox(height: AppDimensions.md),
+          const SizedBox(height: AppDimensions.sm),
           Text(
             verse.arabic,
             textAlign: TextAlign.center,
@@ -43,35 +43,35 @@ class DailyVerseCard extends StatelessWidget {
             style: const TextStyle(
               color: AppColors.gold,
               fontFamily: 'Amiri',
-              fontSize: 22,
-              height: 2.0,
+              fontSize: 20,
+              height: 1.8,
               fontWeight: FontWeight.w400,
             ),
           ),
-          const SizedBox(height: AppDimensions.md),
+          const SizedBox(height: AppDimensions.sm),
           Container(
             height: 1,
             decoration: const BoxDecoration(color: AppColors.goldMuted),
           ),
-          const SizedBox(height: AppDimensions.md),
+          const SizedBox(height: AppDimensions.sm),
           Text(
             verse.translation,
             textAlign: TextAlign.center,
             style: const TextStyle(
               color: AppColors.textOnDarkMuted,
               fontFamily: 'Inter',
-              fontSize: 13,
-              height: 1.6,
+              fontSize: 12,
+              height: 1.5,
               fontStyle: FontStyle.italic,
             ),
           ),
-          const SizedBox(height: AppDimensions.sm),
+          const SizedBox(height: AppDimensions.xs),
           Text(
             '— سورة ${verse.surah}، الآية ${verse.ayah}',
             style: const TextStyle(
               color: AppColors.goldLight,
               fontFamily: 'Amiri',
-              fontSize: 14,
+              fontSize: 12,
             ),
           ),
         ],

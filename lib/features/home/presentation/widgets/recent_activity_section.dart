@@ -24,11 +24,11 @@ class RecentActivitySection extends ConsumerWidget {
           style: TextStyle(
             color: AppColors.textOnDark,
             fontFamily: 'Amiri',
-            fontSize: 18,
+            fontSize: 16,
             fontWeight: FontWeight.w700,
           ),
         ),
-        const SizedBox(height: AppDimensions.md),
+        const SizedBox(height: AppDimensions.sm),
         ...displayList.map((a) => _ActivityItem(activity: a)),
       ],
     );

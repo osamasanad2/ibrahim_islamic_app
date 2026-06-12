@@ -32,17 +32,17 @@ class QuickActionsGrid extends StatelessWidget {
           style: TextStyle(
             color: AppColors.textOnDark,
             fontFamily: 'Amiri',
-            fontSize: 18,
+            fontSize: 16,
             fontWeight: FontWeight.w700,
           ),
         ),
-        const SizedBox(height: AppDimensions.md),
+        const SizedBox(height: AppDimensions.sm),
         GridView.count(
           crossAxisCount: 4,
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
-          mainAxisSpacing: AppDimensions.md,
-          crossAxisSpacing: AppDimensions.md,
+          mainAxisSpacing: AppDimensions.sm,
+          crossAxisSpacing: AppDimensions.sm,
           children: actions.map((a) => _ActionItem(action: a)).toList(),
         ),
       ],
@@ -70,14 +70,14 @@ class _ActionItem extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Container(
-            width: 54,
-            height: 54,
+            width: 46,
+            height: 46,
             decoration: BoxDecoration(
               color: action.color.withValues(alpha: 0.15),
               borderRadius: BorderRadius.circular(AppDimensions.radiusMd),
               border: Border.all(color: action.color.withValues(alpha: 0.3)),
             ),
-            child: Icon(action.icon, color: action.color, size: 26),
+            child: Icon(action.icon, color: action.color, size: 22),
           ),
           const SizedBox(height: AppDimensions.xs),
           Text(
@@ -85,7 +85,7 @@ class _ActionItem extends StatelessWidget {
             style: const TextStyle(
               color: AppColors.textOnDark,
               fontFamily: 'Amiri',
-              fontSize: 13,
+              fontSize: 11,
             ),
           ),
         ],

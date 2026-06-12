@@ -20,8 +20,8 @@ class ContinueReadingCard extends StatelessWidget {
         MaterialPageRoute(builder: (_) => QuranMushafScreen(initialPage: lastPage)),
       ),
       child: Container(
-        margin: const EdgeInsets.only(bottom: AppDimensions.lg),
-        padding: const EdgeInsets.all(AppDimensions.lg),
+        margin: const EdgeInsets.only(bottom: AppDimensions.md),
+        padding: const EdgeInsets.all(AppDimensions.md),
         decoration: BoxDecoration(
           gradient: const LinearGradient(
             colors: [Color(0xFF2D4B7A), AppColors.navy],
@@ -36,13 +36,13 @@ class ContinueReadingCard extends StatelessWidget {
         child: Row(
           children: [
             Container(
-              width: 48,
-              height: 48,
+              width: 40,
+              height: 40,
               decoration: BoxDecoration(
                 color: AppColors.gold.withValues(alpha: 0.2),
                 shape: BoxShape.circle,
               ),
-              child: const Icon(Icons.menu_book, color: AppColors.gold),
+              child: const Icon(Icons.menu_book, color: AppColors.gold, size: 20),
             ),
             const SizedBox(width: AppDimensions.md),
             const Expanded(
@@ -54,7 +54,7 @@ class ContinueReadingCard extends StatelessWidget {
                     style: TextStyle(
                       color: AppColors.gold,
                       fontFamily: 'Amiri',
-                      fontSize: 18,
+                      fontSize: 16,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
@@ -63,7 +63,7 @@ class ContinueReadingCard extends StatelessWidget {
                     style: TextStyle(
                       color: Colors.white70,
                       fontFamily: 'Amiri',
-                      fontSize: 13,
+                      fontSize: 12,
                     ),
                   ),
                 ],
@@ -73,13 +73,13 @@ class ContinueReadingCard extends StatelessWidget {
               children: [
                 const Text(
                   'صفحة',
-                  style: TextStyle(color: Colors.white54, fontSize: 10),
+                  style: TextStyle(color: Colors.white54, fontSize: 9),
                 ),
                 Text(
                   '$lastPage',
                   style: const TextStyle(
                     color: Colors.white,
-                    fontSize: 20,
+                    fontSize: 18,
                     fontWeight: FontWeight.bold,
                   ),
                 ),

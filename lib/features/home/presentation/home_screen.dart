@@ -10,7 +10,6 @@ import '../../../core/utils/daily_hadith.dart';
 import '../../../core/utils/daily_suggestion.dart';
 import '../../../core/utils/date_utils.dart';
 import 'widgets/prayer_countdown_card.dart';
-import 'widgets/prayer_times_list.dart';
 import 'widgets/daily_verse_card.dart';
 import 'widgets/progress_tracker_row.dart';
 import 'widgets/quick_actions_grid.dart';
@@ -63,7 +62,7 @@ class HomeScreen extends ConsumerWidget {
                   GestureDetector(
                     onTap: () => context.push('/calendar'),
                     child: Container(
-                      padding: const EdgeInsets.symmetric(vertical: AppDimensions.lg, horizontal: AppDimensions.lg),
+                      padding: const EdgeInsets.symmetric(vertical: AppDimensions.md, horizontal: AppDimensions.lg),
                       decoration: BoxDecoration(
                         gradient: const LinearGradient(
                           colors: [Color(0xFF1A2C4E), Color(0xFF0F1C3A)],
@@ -73,25 +72,25 @@ class HomeScreen extends ConsumerWidget {
                         borderRadius: BorderRadius.circular(AppDimensions.radiusXl),
                         border: Border.all(color: AppColors.goldMuted),
                       ),
-                      child: Column(
+                  child: Column(
+                    children: [
+                      const Icon(Icons.calendar_month, color: AppColors.gold, size: 22),
+                      const SizedBox(height: AppDimensions.xs),
+                      Text(
+                        dayName,
+                        style: const TextStyle(
+                          color: AppColors.gold,
+                          fontFamily: 'Amiri',
+                          fontSize: 20,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                      const SizedBox(height: AppDimensions.sm),
+                      Row(
                         children: [
-                          const Icon(Icons.calendar_month, color: AppColors.gold, size: 28),
-                          const SizedBox(height: AppDimensions.sm),
-                          Text(
-                            dayName,
-                            style: const TextStyle(
-                              color: AppColors.gold,
-                              fontFamily: 'Amiri',
-                              fontSize: 24,
-                              fontWeight: FontWeight.w700,
-                            ),
-                          ),
-                          const SizedBox(height: AppDimensions.md),
-                          Row(
-                            children: [
-                              Expanded(
-                                child: Container(
-                                  padding: const EdgeInsets.symmetric(vertical: AppDimensions.sm, horizontal: AppDimensions.md),
+                          Expanded(
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(vertical: AppDimensions.xs, horizontal: AppDimensions.sm),
                                   decoration: BoxDecoration(
                                     color: AppColors.navy,
                                     borderRadius: BorderRadius.circular(AppDimensions.radiusMd),
@@ -100,12 +99,12 @@ class HomeScreen extends ConsumerWidget {
                                   child: Column(
                                     children: [
                                       const Text('التاريخ الهجري',
-                                        style: TextStyle(color: AppColors.goldMuted, fontFamily: 'Inter', fontSize: 10)),
-                                      const SizedBox(height: 4),
+                                        style: TextStyle(color: AppColors.goldMuted, fontFamily: 'Inter', fontSize: 9)),
+                                      const SizedBox(height: 2),
                                       Text(
                                         '${today.hDay} $hijriMonth ${today.hYear} هـ',
                                         textAlign: TextAlign.center,
-                                        style: const TextStyle(color: AppColors.goldLight, fontFamily: 'Amiri', fontSize: 15, fontWeight: FontWeight.w600),
+                                        style: const TextStyle(color: AppColors.goldLight, fontFamily: 'Amiri', fontSize: 13, fontWeight: FontWeight.w600),
                                       ),
                                     ],
                                   ),
@@ -123,12 +122,12 @@ class HomeScreen extends ConsumerWidget {
                                   child: Column(
                                     children: [
                                       const Text('التاريخ الميلادي',
-                                        style: TextStyle(color: AppColors.goldMuted, fontFamily: 'Inter', fontSize: 10)),
-                                      const SizedBox(height: 4),
+                                        style: TextStyle(color: AppColors.goldMuted, fontFamily: 'Inter', fontSize: 9)),
+                                      const SizedBox(height: 2),
                                       Text(
                                         '${now.day} $miladiMonth ${now.year}م',
                                         textAlign: TextAlign.center,
-                                        style: const TextStyle(color: AppColors.textOnDark, fontFamily: 'Amiri', fontSize: 15, fontWeight: FontWeight.w600),
+                                        style: const TextStyle(color: AppColors.textOnDark, fontFamily: 'Amiri', fontSize: 13, fontWeight: FontWeight.w600),
                                       ),
                                     ],
                                   ),
@@ -142,33 +141,27 @@ class HomeScreen extends ConsumerWidget {
                   ),
                   const SizedBox(height: AppDimensions.md),
 
-                  // ========== PRAYER TIMES (تحت التاريخ مباشرة) ==========
+                  // ========== PRAYER TIMES ==========
                   scheduleAsync.when(
                     loading: () => const _LoadingCard(),
                     error: (_, __) => const _LoadingCard(),
-                    data: (schedule) => Column(
-                      children: [
-                        PrayerCountdownCard(schedule: schedule),
-                        const SizedBox(height: AppDimensions.sm),
-                        PrayerTimesList(schedule: schedule),
-                      ],
-                    ),
+                    data: (schedule) => PrayerCountdownCard(schedule: schedule),
                   ),
-                  const SizedBox(height: AppDimensions.md),
+                  const SizedBox(height: AppDimensions.sm),
 
                   // ========== SUGGESTION OF THE DAY ==========
                   Container(
-                    padding: const EdgeInsets.all(AppDimensions.lg),
+                    padding: const EdgeInsets.fromLTRB(AppDimensions.md, AppDimensions.sm, AppDimensions.md, AppDimensions.sm),
                     decoration: BoxDecoration(
                       color: AppColors.navyLight,
                       borderRadius: BorderRadius.circular(AppDimensions.radiusLg),
                       border: Border.all(color: AppColors.goldMuted),
                     ),
                     child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
-                        Text(suggestion.icon ?? '🌟', style: const TextStyle(fontSize: 28)),
-                        const SizedBox(width: AppDimensions.md),
+                        Text(suggestion.icon ?? '🌟', style: const TextStyle(fontSize: 22)),
+                        const SizedBox(width: AppDimensions.sm),
                         Expanded(
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
@@ -189,7 +182,7 @@ class HomeScreen extends ConsumerWidget {
                       ],
                     ),
                   ),
-                  const SizedBox(height: AppDimensions.md),
+                  const SizedBox(height: AppDimensions.sm),
 
                   // ========== AYAH OF THE DAY ==========
                   verseAsync.when(
@@ -197,7 +190,7 @@ class HomeScreen extends ConsumerWidget {
                     error: (_, __) => const SizedBox.shrink(),
                     data: (verse) => DailyVerseCard(verse: verse),
                   ),
-                  if (verseAsync.hasValue) const SizedBox(height: AppDimensions.md),
+                  if (verseAsync.hasValue) const SizedBox(height: AppDimensions.sm),
 
                   // ========== HADITH OF THE DAY ==========
                   hadithAsync.when(
@@ -205,19 +198,19 @@ class HomeScreen extends ConsumerWidget {
                     error: (_, __) => const SizedBox.shrink(),
                     data: (hadith) => _HadithCard(hadith: hadith),
                   ),
-                  if (hadithAsync.hasValue) const SizedBox(height: AppDimensions.md),
+                  if (hadithAsync.hasValue) const SizedBox(height: AppDimensions.sm),
 
                   // ========== CONTINUE READING ==========
                   const ContinueReadingCard(),
-                  const SizedBox(height: AppDimensions.md),
+                  const SizedBox(height: AppDimensions.sm),
 
                   // ========== QUICK ACTIONS ==========
                   const QuickActionsGrid(),
-                  const SizedBox(height: AppDimensions.md),
+                  const SizedBox(height: AppDimensions.sm),
 
                   // ========== RECENTLY USED ==========
                   const RecentActivitySection(),
-                  const SizedBox(height: AppDimensions.md),
+                  const SizedBox(height: AppDimensions.sm),
 
                   // ========== PROGRESS ==========
                   ProgressTrackerRow(storage: storage),
@@ -248,10 +241,10 @@ class HomeScreen extends ConsumerWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const Text('كيف تشعر الآن؟',
-          style: TextStyle(color: AppColors.textOnDark, fontFamily: 'Amiri', fontSize: 18, fontWeight: FontWeight.w700)),
+          style: TextStyle(color: AppColors.textOnDark, fontFamily: 'Amiri', fontSize: 16, fontWeight: FontWeight.w700)),
         const SizedBox(height: AppDimensions.md),
         SizedBox(
-          height: 80,
+          height: 64,
           child: ListView.builder(
             scrollDirection: Axis.horizontal,
             itemCount: moods.length,
@@ -259,20 +252,20 @@ class HomeScreen extends ConsumerWidget {
               return GestureDetector(
                 onTap: () => context.push('/dua'),
                 child: Container(
-                  width: 70,
+                  width: 56,
                   margin: const EdgeInsets.only(left: AppDimensions.sm),
                   decoration: BoxDecoration(
                     color: AppColors.navyLight,
-                    borderRadius: BorderRadius.circular(AppDimensions.radiusLg),
+                    borderRadius: BorderRadius.circular(AppDimensions.radiusMd),
                     border: Border.all(color: AppColors.goldMuted),
                   ),
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Text(moods[i].$1, style: const TextStyle(fontSize: 24)),
-                      const SizedBox(height: 4),
+                      Text(moods[i].$1, style: const TextStyle(fontSize: 18)),
+                      const SizedBox(height: 2),
                       Text(moods[i].$2,
-                        style: const TextStyle(color: AppColors.textOnDarkMuted, fontFamily: 'Amiri', fontSize: 12)),
+                        style: const TextStyle(color: AppColors.textOnDarkMuted, fontFamily: 'Amiri', fontSize: 10)),
                     ],
                   ),
                 ),
@@ -286,48 +279,48 @@ class HomeScreen extends ConsumerWidget {
 
   Widget _buildHeader(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.fromLTRB(AppDimensions.lg, AppDimensions.lg, AppDimensions.lg, AppDimensions.sm),
+      padding: const EdgeInsets.fromLTRB(AppDimensions.lg, AppDimensions.sm, AppDimensions.lg, AppDimensions.xs),
       child: Row(
         children: [
           ClipRRect(
-            borderRadius: BorderRadius.circular(AppDimensions.radiusMd),
-            child: Image.asset('assets/images/app_icon.png', height: 40, width: 40),
+            borderRadius: BorderRadius.circular(AppDimensions.radiusSm),
+            child: Image.asset('assets/images/app_icon.png', height: 32, width: 32),
           ),
-          const SizedBox(width: 10),
+          const SizedBox(width: 8),
           const Column(
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text('إبراهيم',
-                style: TextStyle(color: AppColors.gold, fontFamily: 'Amiri', fontSize: 20, fontWeight: FontWeight.w700, height: 1.2)),
+                style: TextStyle(color: AppColors.gold, fontFamily: 'Amiri', fontSize: 18, fontWeight: FontWeight.w700, height: 1.2)),
               Text('رفيقك الديني',
-                style: TextStyle(color: AppColors.goldLight, fontFamily: 'Inter', fontSize: 11, fontWeight: FontWeight.w600, height: 1.2)),
+                style: TextStyle(color: AppColors.goldLight, fontFamily: 'Inter', fontSize: 10, fontWeight: FontWeight.w600, height: 1.2)),
             ],
           ),
           const Spacer(),
           GestureDetector(
             onTap: () => context.push('/surah-audio'),
             child: Container(
-              padding: const EdgeInsets.all(10),
+              padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
                 color: AppColors.navyLight,
                 borderRadius: BorderRadius.circular(AppDimensions.radiusMd),
                 border: Border.all(color: AppColors.goldMuted.withValues(alpha: 0.3)),
               ),
-              child: const Icon(Icons.headphones, color: AppColors.gold, size: 22),
+              child: const Icon(Icons.headphones, color: AppColors.gold, size: 18),
             ),
           ),
-          const SizedBox(width: AppDimensions.sm),
+          const SizedBox(width: AppDimensions.xs),
           GestureDetector(
             onTap: () => context.push('/global-search'),
             child: Container(
-              padding: const EdgeInsets.all(10),
+              padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
                 color: AppColors.navyLight,
                 borderRadius: BorderRadius.circular(AppDimensions.radiusMd),
                 border: Border.all(color: AppColors.goldMuted.withValues(alpha: 0.3)),
               ),
-              child: const Icon(Icons.search, color: AppColors.gold, size: 22),
+              child: const Icon(Icons.search, color: AppColors.gold, size: 18),
             ),
           ),
         ],
@@ -343,10 +336,10 @@ class _HadithCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(AppDimensions.xl),
+      padding: const EdgeInsets.all(AppDimensions.md),
       decoration: BoxDecoration(
         color: AppColors.navyLight,
-        borderRadius: BorderRadius.circular(AppDimensions.radiusXl),
+        borderRadius: BorderRadius.circular(AppDimensions.radiusLg),
         border: Border.all(color: AppColors.goldMuted),
       ),
       child: Column(
@@ -355,48 +348,48 @@ class _HadithCard extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Icon(Icons.chat, color: AppColors.gold, size: 16),
+              const Icon(Icons.chat, color: AppColors.gold, size: 14),
               const SizedBox(width: AppDimensions.xs),
               Text(
                 'حديث اليوم — ${hadith.number}',
-                style: const TextStyle(color: AppColors.gold, fontFamily: 'Inter', fontSize: 12, fontWeight: FontWeight.w600),
+                style: const TextStyle(color: AppColors.gold, fontFamily: 'Inter', fontSize: 11, fontWeight: FontWeight.w600),
               ),
             ],
           ),
-          const SizedBox(height: AppDimensions.md),
+          const SizedBox(height: AppDimensions.sm),
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: AppDimensions.sm, vertical: 4),
+            padding: const EdgeInsets.symmetric(horizontal: AppDimensions.sm, vertical: 2),
             decoration: BoxDecoration(
               color: AppColors.navy,
               borderRadius: BorderRadius.circular(AppDimensions.radiusFull),
             ),
             child: Text(
               hadith.source,
-              style: const TextStyle(color: AppColors.goldMuted, fontFamily: 'Inter', fontSize: 10),
+              style: const TextStyle(color: AppColors.goldMuted, fontFamily: 'Inter', fontSize: 9),
             ),
           ),
           const SizedBox(height: AppDimensions.sm),
           Text(
             'عن ${hadith.narrator} رضي الله عنه قال:',
-            style: const TextStyle(color: AppColors.goldLight, fontFamily: 'Amiri', fontSize: 14, fontWeight: FontWeight.w600),
+            style: const TextStyle(color: AppColors.goldLight, fontFamily: 'Amiri', fontSize: 13, fontWeight: FontWeight.w600),
           ),
-          const SizedBox(height: AppDimensions.sm),
+          const SizedBox(height: AppDimensions.xs),
           Text(
             '«${hadith.arabic}»',
             textDirection: TextDirection.rtl,
             textAlign: TextAlign.center,
-            style: const TextStyle(color: AppColors.gold, fontFamily: 'Amiri', fontSize: 18, height: 2.0),
+            style: const TextStyle(color: AppColors.gold, fontFamily: 'Amiri', fontSize: 16, height: 1.8),
           ),
-          const SizedBox(height: AppDimensions.md),
+          const SizedBox(height: AppDimensions.sm),
           Container(
             height: 1,
             decoration: const BoxDecoration(color: AppColors.goldMuted),
           ),
-          const SizedBox(height: AppDimensions.md),
+          const SizedBox(height: AppDimensions.sm),
           Text(
             hadith.translation,
             textAlign: TextAlign.center,
-            style: const TextStyle(color: AppColors.textOnDarkMuted, fontFamily: 'Inter', fontSize: 13, height: 1.6),
+            style: const TextStyle(color: AppColors.textOnDarkMuted, fontFamily: 'Inter', fontSize: 12, height: 1.5),
           ),
         ],
       ),
