@@ -310,6 +310,19 @@ class HomeScreen extends ConsumerWidget {
                 style: TextStyle(color: AppColors.goldLight, fontFamily: 'Inter', fontSize: 11, fontWeight: FontWeight.w600, height: 1.2)),
             ],
           ),
+          const Spacer(),
+          GestureDetector(
+            onTap: () => context.push('/global-search'),
+            child: Container(
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: AppColors.navyLight,
+                borderRadius: BorderRadius.circular(AppDimensions.radiusMd),
+                border: Border.all(color: AppColors.goldMuted.withValues(alpha: 0.3)),
+              ),
+              child: const Icon(Icons.search, color: AppColors.gold, size: 22),
+            ),
+          ),
         ],
       ),
     );
