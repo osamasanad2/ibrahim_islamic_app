@@ -27,22 +27,28 @@ class _BookReaderScreenState extends State<BookReaderScreen> {
   }
 
   Future<void> _load() async {
-    final meta = await _repo.loadBookMeta(widget.bookId);
-    final content = await _repo.loadContent(widget.bookId);
-    if (mounted) {
-      setState(() {
-        _bookMeta = meta;
-        _content = content;
-        _loading = false;
-      });
-      if (meta != null) {
-        recordActivity(
-          id: 'book-${widget.bookId}',
-          title: meta['title'] as String? ?? 'كتاب',
-          subtitle: meta['author'] as String? ?? '',
-          route: '/book-reader/${widget.bookId}',
-          icon: '📚',
-        );
+    try {
+      final meta = await _repo.loadBookMeta(widget.bookId);
+      final content = await _repo.loadContent(widget.bookId);
+      if (mounted) {
+        setState(() {
+          _bookMeta = meta;
+          _content = content;
+          _loading = false;
+        });
+        if (meta != null) {
+          recordActivity(
+            id: 'book-${widget.bookId}',
+            title: meta['title'] as String? ?? 'كتاب',
+            subtitle: meta['author'] as String? ?? '',
+            route: '/book-reader/${widget.bookId}',
+            icon: '📚',
+          );
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() => _loading = false);
       }
     }
   }

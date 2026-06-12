@@ -13,7 +13,7 @@ class BookContent {
   });
 
   factory BookContent.fromJson(Map<String, dynamic> json) => BookContent(
-        bookId: json['book_id'] as int,
+        bookId: json['id'] as int,
         externalRoute: json['external_route'] as String?,
         chapters: (json['chapters'] as List?)
                 ?.map((e) => BookChapter.fromJson(e as Map<String, dynamic>))

@@ -35,14 +35,18 @@ class _IslamicBooksScreenState extends State<IslamicBooksScreen> {
   }
 
   Future<void> _loadBooks() async {
-    final json = await rootBundle.loadString('assets/books/islamic_books.json');
-    final list = jsonDecode(json) as List;
-    setState(() {
-      _allBooks = list.cast<Map<String, dynamic>>();
-      _categories = ['الكل', ...{for (final b in _allBooks) b['category'] as String}];
-      _filteredBooks = List.from(_allBooks);
-      _loaded = true;
-    });
+    try {
+      final json = await rootBundle.loadString('assets/books/islamic_books.json');
+      final list = jsonDecode(json) as List;
+      setState(() {
+        _allBooks = list.cast<Map<String, dynamic>>();
+        _categories = ['الكل', ...{for (final b in _allBooks) b['category'] as String}];
+        _filteredBooks = List.from(_allBooks);
+        _loaded = true;
+      });
+    } catch (e) {
+      setState(() => _loaded = true);
+    }
   }
 
   void _onSearch() {
