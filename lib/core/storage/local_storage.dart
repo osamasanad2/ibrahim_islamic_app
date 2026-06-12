@@ -142,6 +142,30 @@ class LocalStorage {
   Future<void> setReminderNotificationEnabled(bool value) =>
       saveBool(_reminderNotifKey, value);
 
+  // ── Book reading progress ────────────────────────────────
+  Future<void> saveBookProgress(int bookId, Set<int> readChapters) async {
+    final box = Hive.box(_progressBox);
+    await box.put('book_${bookId}_chapters', readChapters.toList());
+  }
+
+  Set<int> getBookProgress(int bookId) {
+    final box = Hive.box(_progressBox);
+    final raw = box.get('book_${bookId}_chapters', defaultValue: <int>[]);
+    return (raw as List).cast<int>().toSet();
+  }
+
+  int getBookReadCount(int bookId) => getBookProgress(bookId).length;
+
+  Future<void> saveBookTotalChapters(int bookId, int total) async {
+    final box = Hive.box(_progressBox);
+    await box.put('book_${bookId}_total', total);
+  }
+
+  int getBookTotalChapters(int bookId) {
+    final box = Hive.box(_progressBox);
+    return box.get('book_${bookId}_total', defaultValue: 0) as int;
+  }
+
   // ── Spiritual level ───────────────────────────────────────
   Future<void> saveSpiritualLevel(int level) async {
     final box = Hive.box(_progressBox);

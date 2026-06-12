@@ -39,8 +39,14 @@ class DailyHadithSelector {
 
   static Future<DailyHadith> getDailyHadith() async {
     if (_hadiths == null) await _load();
-    final dayOfYear = DateTime.now().difference(DateTime(DateTime.now().year, 1, 1)).inDays;
-    return _hadiths![dayOfYear % _hadiths!.length];
+    final periodIndex = _sixHourPeriodIndex(DateTime.now());
+    return _hadiths![periodIndex % _hadiths!.length];
+  }
+
+  static int _sixHourPeriodIndex(DateTime date) {
+    final dayOfYear = date.difference(DateTime(date.year, 1, 1)).inDays;
+    final period = date.hour ~/ 6;
+    return dayOfYear * 4 + period;
   }
 
   static Future<void> _load() async {

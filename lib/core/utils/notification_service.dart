@@ -133,6 +133,7 @@ class NotificationService {
     required int minute,
     required String channelId,
     required String channelName,
+    String? soundName,
   }) async {
     final now = DateTime.now();
     var scheduledDate = DateTime(now.year, now.month, now.day, hour, minute);
@@ -151,6 +152,10 @@ class NotificationService {
           channelName,
           importance: Importance.max,
           priority: Priority.high,
+          sound: soundName != null
+              ? RawResourceAndroidNotificationSound(soundName)
+              : null,
+          playSound: true,
         ),
         iOS: DarwinNotificationDetails(),
       ),
@@ -177,6 +182,7 @@ class NotificationService {
         minute: notifTime.minute,
         channelId: 'azkar_morning',
         channelName: 'أذكار الصباح',
+        soundName: 'azkar_morning',
       );
     } catch (_) {}
   }
@@ -199,6 +205,7 @@ class NotificationService {
         minute: notifTime.minute,
         channelId: 'azkar_evening',
         channelName: 'أذكار المساء',
+        soundName: 'azkar_evening',
       );
     } catch (_) {}
   }

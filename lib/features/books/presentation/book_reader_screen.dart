@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_dimensions.dart';
 import '../../../core/services/recent_activity_service.dart';
+import '../../../core/storage/local_storage.dart';
 import '../data/book_model.dart';
 
 class BookReaderScreen extends StatefulWidget {
@@ -15,10 +16,12 @@ class BookReaderScreen extends StatefulWidget {
 
 class _BookReaderScreenState extends State<BookReaderScreen> {
   final BookRepository _repo = BookRepository();
+  final LocalStorage _storage = LocalStorage();
   Map<String, dynamic>? _bookMeta;
   BookContent? _content;
   bool _loading = true;
-  final Set<int> _expandedChapters = {};
+  Set<int> _expandedChapters = {};
+  int _totalChapters = 0;
 
   @override
   void initState() {
@@ -31,9 +34,14 @@ class _BookReaderScreenState extends State<BookReaderScreen> {
       final meta = await _repo.loadBookMeta(widget.bookId);
       final content = await _repo.loadContent(widget.bookId);
       if (mounted) {
+        final total = content?.chapters.length ?? 0;
+        final saved = _storage.getBookProgress(widget.bookId);
+        _storage.saveBookTotalChapters(widget.bookId, total);
         setState(() {
           _bookMeta = meta;
           _content = content;
+          _totalChapters = total;
+          _expandedChapters = saved;
           _loading = false;
         });
         if (meta != null) {
@@ -61,6 +69,7 @@ class _BookReaderScreenState extends State<BookReaderScreen> {
         _expandedChapters.add(index);
       }
     });
+    _storage.saveBookProgress(widget.bookId, _expandedChapters);
   }
 
   @override
@@ -95,33 +104,33 @@ class _BookReaderScreenState extends State<BookReaderScreen> {
                         ],
                       ),
                     )
-                  : CustomScrollView(
-                      slivers: [
-                        SliverToBoxAdapter(
-                          child: _BookHeader(book: _bookMeta!),
-                        ),
-                        SliverToBoxAdapter(
-                          child: Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: AppDimensions.lg),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                const Text(
-                                  'فهرس الكتاب',
-                                  style: TextStyle(
-                                    color: AppColors.gold,
-                                    fontFamily: 'Amiri',
-                                    fontSize: 20,
-                                    fontWeight: FontWeight.w700,
+                          : CustomScrollView(
+                              slivers: [
+                                SliverToBoxAdapter(
+                                  child: _BookHeader(book: _bookMeta!, readCount: _expandedChapters.length, totalChapters: _totalChapters),
+                                ),
+                                SliverToBoxAdapter(
+                                  child: Padding(
+                                    padding: const EdgeInsets.symmetric(horizontal: AppDimensions.lg),
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        const Text(
+                                          'فهرس الكتاب',
+                                          style: TextStyle(
+                                            color: AppColors.gold,
+                                            fontFamily: 'Amiri',
+                                            fontSize: 20,
+                                            fontWeight: FontWeight.w700,
+                                          ),
+                                        ),
+                                        const SizedBox(height: AppDimensions.sm),
+                                        const Divider(color: AppColors.goldMuted),
+                                        const SizedBox(height: AppDimensions.sm),
+                                      ],
+                                    ),
                                   ),
                                 ),
-                                const SizedBox(height: AppDimensions.sm),
-                                const Divider(color: AppColors.goldMuted),
-                                const SizedBox(height: AppDimensions.sm),
-                              ],
-                            ),
-                          ),
-                        ),
                         SliverList(
                           delegate: SliverChildBuilderDelegate(
                             (context, index) {
@@ -131,6 +140,7 @@ class _BookReaderScreenState extends State<BookReaderScreen> {
                                 chapter: chapter,
                                 index: index + 1,
                                 expanded: expanded,
+                                read: _expandedChapters.contains(index),
                                 onTap: () => _toggleChapter(index),
                               );
                             },
@@ -146,7 +156,9 @@ class _BookReaderScreenState extends State<BookReaderScreen> {
 
 class _BookHeader extends StatelessWidget {
   final Map<String, dynamic> book;
-  const _BookHeader({required this.book});
+  final int readCount;
+  final int totalChapters;
+  const _BookHeader({required this.book, this.readCount = 0, this.totalChapters = 0});
 
   IconData _categoryIcon(String category) {
     if (category.contains('تفسير')) return Icons.menu_book;
@@ -230,6 +242,29 @@ class _BookHeader extends StatelessWidget {
             textAlign: TextAlign.center,
             style: const TextStyle(color: AppColors.textOnDarkMuted, fontFamily: 'Amiri', fontSize: 14, height: 1.6),
           ),
+          if (totalChapters > 0) ...[
+            const SizedBox(height: AppDimensions.md),
+            const Divider(color: AppColors.goldMuted),
+            const SizedBox(height: AppDimensions.sm),
+            Row(
+              children: [
+                const Icon(Icons.check_circle, color: AppColors.success, size: 16),
+                const SizedBox(width: 6),
+                Text('$readCount من $totalChapters فصول مقروءة',
+                  style: const TextStyle(color: AppColors.goldMuted, fontFamily: 'Amiri', fontSize: 12)),
+              ],
+            ),
+            const SizedBox(height: AppDimensions.sm),
+            ClipRRect(
+              borderRadius: BorderRadius.circular(4),
+              child: LinearProgressIndicator(
+                value: totalChapters > 0 ? readCount / totalChapters : 0,
+                backgroundColor: AppColors.navy,
+                valueColor: const AlwaysStoppedAnimation<Color>(AppColors.success),
+                minHeight: 6,
+              ),
+            ),
+          ],
         ],
       ),
     );
@@ -240,9 +275,10 @@ class _ChapterCard extends StatelessWidget {
   final BookChapter chapter;
   final int index;
   final bool expanded;
+  final bool read;
   final VoidCallback onTap;
 
-  const _ChapterCard({required this.chapter, required this.index, required this.expanded, required this.onTap});
+  const _ChapterCard({required this.chapter, required this.index, required this.expanded, required this.read, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
@@ -263,10 +299,15 @@ class _ChapterCard extends StatelessWidget {
                 children: [
                   Container(
                     width: 32, height: 32,
-                    decoration: const BoxDecoration(color: AppColors.goldMuted, shape: BoxShape.circle),
+                    decoration: BoxDecoration(
+                      color: read ? AppColors.success.withValues(alpha: 0.2) : AppColors.goldMuted,
+                      shape: BoxShape.circle,
+                    ),
                     child: Center(
-                      child: Text('$index',
-                        style: const TextStyle(color: AppColors.gold, fontFamily: 'Inter', fontSize: 12, fontWeight: FontWeight.w700)),
+                      child: read
+                          ? const Icon(Icons.check, color: AppColors.success, size: 18)
+                          : Text('$index',
+                              style: const TextStyle(color: AppColors.gold, fontFamily: 'Inter', fontSize: 12, fontWeight: FontWeight.w700)),
                     ),
                   ),
                   const SizedBox(width: AppDimensions.md),

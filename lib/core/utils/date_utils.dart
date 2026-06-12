@@ -31,14 +31,14 @@ class DailyVerse {
   }
 }
 
-/// يختار آية يومية بناءً على اليوم من السنة
+/// يختار آية يومية بناءً على الفترة الزمنية (كل 6 ساعات)
 class DailyVerseSelector {
   static List<DailyVerse>? _verses;
 
   static Future<DailyVerse> getDailyVerse() async {
     if (_verses == null) await _loadVerses();
-    final dayOfYear = _dayOfYear(DateTime.now());
-    final index = dayOfYear % _verses!.length;
+    final periodIndex = _sixHourPeriodIndex(DateTime.now());
+    final index = periodIndex % _verses!.length;
     return _verses![index];
   }
 
@@ -50,7 +50,9 @@ class DailyVerseSelector {
     _verses = list.map((e) => DailyVerse.fromJson(e as Map<String, dynamic>)).toList();
   }
 
-  static int _dayOfYear(DateTime date) {
-    return date.difference(DateTime(date.year, 1, 1)).inDays + 1;
+  static int _sixHourPeriodIndex(DateTime date) {
+    final dayOfYear = date.difference(DateTime(date.year, 1, 1)).inDays + 1;
+    final period = date.hour ~/ 6;
+    return dayOfYear * 4 + period;
   }
 }

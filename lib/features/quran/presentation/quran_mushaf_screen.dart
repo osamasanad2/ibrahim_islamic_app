@@ -369,18 +369,18 @@ class _ActionChip extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
         decoration: BoxDecoration(
           color: AppColors.navyLight,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: AppColors.goldMuted, width: 0.8),
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(color: AppColors.goldMuted, width: 0.5),
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(icon, color: iconColor ?? AppColors.gold, size: 14),
-            const SizedBox(width: 4),
-            Text(label, style: const TextStyle(color: Colors.white, fontFamily: 'Amiri', fontSize: 12, fontWeight: FontWeight.bold)),
+            Icon(icon, color: iconColor ?? AppColors.gold, size: 11),
+            const SizedBox(width: 3),
+            Text(label, style: const TextStyle(color: Colors.white, fontFamily: 'Amiri', fontSize: 10, fontWeight: FontWeight.bold)),
           ],
         ),
       ),
@@ -613,8 +613,8 @@ class _TafsirTabsSheetState extends State<_TafsirTabsSheet> with SingleTickerPro
               controller: _tabController,
               children: [
                 _TafsirTab(surah: widget.surah, ayah: widget.ayah),
-                const _ComingSoonTab(title: 'معاني الكلمات', icon: Icons.translate),
-                const _ComingSoonTab(title: 'أسباب النزول', icon: Icons.history_edu),
+                _WordMeaningsTab(surah: widget.surah, ayah: widget.ayah),
+                _AsbabTab(surah: widget.surah, ayah: widget.ayah),
               ],
             ),
           ),
@@ -648,24 +648,86 @@ class _TafsirTab extends ConsumerWidget {
   }
 }
 
-class _ComingSoonTab extends StatelessWidget {
-  final String title;
-  final IconData icon;
-  const _ComingSoonTab({required this.title, required this.icon});
+class _WordMeaningsTab extends ConsumerWidget {
+  final int surah;
+  final int ayah;
+  const _WordMeaningsTab({required this.surah, required this.ayah});
 
   @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(icon, color: AppColors.goldMuted, size: 64),
-          const SizedBox(height: 16),
-          Text(title, style: const TextStyle(color: AppColors.gold, fontFamily: 'Amiri', fontSize: 20, fontWeight: FontWeight.bold)),
-          const SizedBox(height: 8),
-          const Text('سيتم تفعيل هذه الميزة في التحديث القادم إن شاء الله',
-            style: TextStyle(color: Colors.white54, fontFamily: 'Amiri', fontSize: 16)),
-        ],
+  Widget build(BuildContext context, WidgetRef ref) {
+    final async = ref.watch(wordMeaningsProvider((surah: surah, ayah: ayah)));
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(AppDimensions.lg),
+      child: async.when(
+        loading: () => const Padding(padding: EdgeInsets.symmetric(vertical: 32), child: Center(child: CircularProgressIndicator(color: AppColors.gold))),
+        error: (_, __) => const Text('تعذر تحميل معاني الكلمات', style: TextStyle(color: Colors.red, fontFamily: 'Amiri')),
+        data: (words) {
+          if (words.isEmpty) {
+            return const Text('معاني الكلمات غير متاحة حالياً', style: TextStyle(color: AppColors.textOnDarkMuted, fontFamily: 'Amiri'));
+          }
+          return Column(
+            children: words.map((w) => Container(
+              margin: const EdgeInsets.only(bottom: 8),
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: AppColors.navyLight,
+                borderRadius: BorderRadius.circular(AppDimensions.radiusMd),
+                border: Border.all(color: AppColors.goldMuted.withValues(alpha: 0.2)),
+              ),
+              child: Row(
+                children: [
+                  Container(
+                    width: 28, height: 28,
+                    decoration: const BoxDecoration(color: AppColors.goldMuted, shape: BoxShape.circle),
+                    child: Center(child: Text('${w.position}', style: const TextStyle(color: AppColors.gold, fontFamily: 'Inter', fontSize: 10, fontWeight: FontWeight.w700))),
+                  ),
+                  const SizedBox(width: 10),
+                  Text(w.arabic, textDirection: TextDirection.rtl, style: const TextStyle(color: AppColors.gold, fontFamily: 'Amiri', fontSize: 16, fontWeight: FontWeight.bold)),
+                  const Spacer(),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                    decoration: BoxDecoration(
+                      color: AppColors.navy,
+                      borderRadius: BorderRadius.circular(AppDimensions.radiusFull),
+                      border: Border.all(color: AppColors.goldMuted.withValues(alpha: 0.3)),
+                    ),
+                    child: Text(w.translation, style: const TextStyle(color: AppColors.goldLight, fontFamily: 'Inter', fontSize: 10)),
+                  ),
+                ],
+              ),
+            )).toList(),
+          );
+        },
+      ),
+    );
+  }
+}
+
+class _AsbabTab extends ConsumerWidget {
+  final int surah;
+  final int ayah;
+  const _AsbabTab({required this.surah, required this.ayah});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final async = ref.watch(asbabProvider((surah: surah, ayah: ayah)));
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(AppDimensions.lg),
+      child: async.when(
+        loading: () => const Padding(padding: EdgeInsets.symmetric(vertical: 32), child: Center(child: CircularProgressIndicator(color: AppColors.gold))),
+        error: (_, __) => const Text('تعذر تحميل سبب النزول', style: TextStyle(color: Colors.red, fontFamily: 'Amiri')),
+        data: (text) => text.isEmpty
+            ? const Text('لا يوجد سبب نزول مسجّل لهذه الآية', style: TextStyle(color: AppColors.textOnDarkMuted, fontFamily: 'Amiri'))
+            : Container(
+                padding: const EdgeInsets.all(AppDimensions.md),
+                decoration: BoxDecoration(
+                  color: AppColors.navyLight,
+                  borderRadius: BorderRadius.circular(AppDimensions.radiusMd),
+                  border: Border.all(color: AppColors.goldMuted.withValues(alpha: 0.3)),
+                ),
+                child: Text(text, textAlign: TextAlign.justify, textDirection: TextDirection.rtl,
+                    style: const TextStyle(color: AppColors.textOnDark, fontFamily: 'Amiri', fontSize: 15, height: 1.6)),
+              ),
       ),
     );
   }

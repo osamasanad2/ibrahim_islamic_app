@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_dimensions.dart';
 import '../../../core/services/recent_activity_service.dart';
+import '../../../core/storage/local_storage.dart';
 
 class IslamicBooksScreen extends StatefulWidget {
   const IslamicBooksScreen({super.key});
@@ -199,11 +200,35 @@ class _IslamicBooksScreenState extends State<IslamicBooksScreen> {
   }
 }
 
-class _BookCard extends StatelessWidget {
+class _BookCard extends StatefulWidget {
   final Map<String, dynamic> book;
   final VoidCallback onTap;
 
   const _BookCard({required this.book, required this.onTap});
+
+  @override
+  State<_BookCard> createState() => _BookCardState();
+}
+
+class _BookCardState extends State<_BookCard> {
+  int _readCount = 0;
+  int _totalChapters = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadProgress();
+  }
+
+  void _loadProgress() {
+    final storage = LocalStorage();
+    final bookId = widget.book['id'] as int;
+    final hasExternal = widget.book['external_route'] != null;
+    if (!hasExternal) {
+      _readCount = storage.getBookReadCount(bookId);
+      _totalChapters = storage.getBookTotalChapters(bookId);
+    }
+  }
 
   IconData _categoryIcon(String category) {
     if (category.contains('تفسير')) return Icons.menu_book;
@@ -229,11 +254,11 @@ class _BookCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final category = book['category'] as String;
+    final category = widget.book['category'] as String;
     final color = _categoryColor(category);
 
     return GestureDetector(
-      onTap: onTap,
+      onTap: widget.onTap,
       child: Container(
         margin: const EdgeInsets.only(bottom: AppDimensions.sm),
         padding: const EdgeInsets.all(AppDimensions.md),
@@ -259,21 +284,36 @@ class _BookCard extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    book['title'] as String,
+                    widget.book['title'] as String,
                     style: const TextStyle(color: AppColors.textOnDark, fontFamily: 'Amiri', fontSize: 16, fontWeight: FontWeight.w700),
                   ),
                   const SizedBox(height: 2),
                   Text(
-                    book['author'] as String,
+                    widget.book['author'] as String,
                     style: const TextStyle(color: AppColors.goldMuted, fontFamily: 'Inter', fontSize: 12),
                   ),
                   const SizedBox(height: AppDimensions.xs),
                   Text(
-                    book['description'] as String,
+                    widget.book['description'] as String,
                     style: const TextStyle(color: AppColors.textOnDarkMuted, fontFamily: 'Amiri', fontSize: 13, height: 1.5),
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                   ),
+                  if (_totalChapters > 0) ...[
+                    const SizedBox(height: 6),
+                    Row(
+                      children: [
+                        Icon(Icons.check_circle, size: 12,
+                          color: _readCount == _totalChapters ? AppColors.success : AppColors.goldMuted),
+                        const SizedBox(width: 4),
+                        Text('$_readCount / $_totalChapters فصول',
+                          style: TextStyle(
+                            color: _readCount == _totalChapters ? AppColors.success : AppColors.textOnDarkMuted,
+                            fontFamily: 'Inter', fontSize: 11,
+                          )),
+                      ],
+                    ),
+                  ],
                 ],
               ),
             ),
