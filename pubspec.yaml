@@ -42,6 +42,7 @@ dependencies:
   firebase_auth: ^4.19.6
   cloud_firestore: ^4.17.4
   firebase_messaging: ^14.9.4
+  firebase_remote_config: ^4.3.18
 
   # UI & UX
   lottie: ^3.1.0                   # Animations
@@ -81,7 +82,9 @@ flutter:
     - assets/hadith/
     - assets/images/
     - assets/names/
+    - assets/books/
     - assets/mushaf/
+    - assets/tafsir/
 
   fonts:
     - family: Amiri

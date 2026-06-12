@@ -20,10 +20,13 @@ class _AiChatScreenState extends ConsumerState<AiChatScreen> {
   bool _isLoading = false;
 
   static const String _systemPrompt = '''
-أنت مساعد إسلامي متخصص اسمه إبراهيم. تجيب على أسئلة الفقه والتفسير
-والحديث والسيرة النبوية والأدعية. تستند دائماً إلى القرآن الكريم والسنة
-النبوية الصحيحة. أسلوبك هادئ، موثوق، ومحترم. تذكر المصادر دائماً.
-لا تفتي في المسائل الخلافية الكبرى — أحل المستخدم إلى العلماء.
+أنت مساعد إسلامي متخصص اسمه إبراهيم. تجيب على جميع الأسئلة الدينية
+والشرعية: الفقه، التفسير، الحديث، العقيدة، السيرة النبوية، الأذكار
+والأدعية، الرقائق، التزكية، السيرة، التاريخ الإسلامي، علوم القرآن،
+مصطلح الحديث، وأصول الفقه. تستند دائماً إلى القرآن الكريم والسنة
+النبوية الصحيحة وإجماع العلماء. أسلوبك هادئ، موثوق، ومحترم.
+تذكر المصادر والأدلة دائماً. لا تفتي في المسائل الخلافية الكبرى —
+أحل المستخدم إلى العلماء. وفي نهاية كل رد أضف: والله أعلم.
 ''';
 
   final List<String> _suggestions = [
@@ -52,7 +55,7 @@ class _AiChatScreenState extends ConsumerState<AiChatScreen> {
     _scrollToBottom();
 
     try {
-      final apiKey = ref.read(aiApiKeyProvider);
+      final apiKey = ref.read(effectiveApiKeyProvider);
       final providerId = ref.read(selectedAiProviderId);
       final model = ref.read(selectedAiModel);
 
@@ -70,9 +73,13 @@ class _AiChatScreenState extends ConsumerState<AiChatScreen> {
         systemPrompt: _systemPrompt,
       );
 
+      final replyWithFooter = reply.contains('والله أعلم') || reply.contains('والله اعلم')
+          ? reply
+          : '$reply\n\nوالله أعلم';
+
       if (mounted) {
         setState(() {
-          _messages.add(ChatMessage(content: reply, isUser: false, timestamp: DateTime.now()));
+          _messages.add(ChatMessage(content: replyWithFooter, isUser: false, timestamp: DateTime.now()));
           _isLoading = false;
         });
         _scrollToBottom();
@@ -169,6 +176,12 @@ class _AiChatScreenState extends ConsumerState<AiChatScreen> {
                     },
                   ),
                   const SizedBox(height: 16),
+                  if (ref.read(hasRemoteKeyProvider))
+                    const Padding(
+                      padding: EdgeInsets.only(bottom: 8),
+                      child: Text('المفتاح مضبوط تلقائياً — اتركه فارغاً أو أدخل مفتاحك الخاص', 
+                        style: TextStyle(color: AppColors.goldMuted, fontFamily: 'Amiri', fontSize: 12)),
+                    ),
                   Text(currentProv.apiKeyLabel, style: const TextStyle(color: AppColors.gold, fontFamily: 'Amiri', fontSize: 14)),
                   const SizedBox(height: 8),
                   TextField(
@@ -282,7 +295,8 @@ class _AiChatScreenState extends ConsumerState<AiChatScreen> {
           ),
           const SizedBox(height: AppDimensions.lg),
           Consumer(builder: (context, ref, _) {
-            final hasKey = ref.watch(aiApiKeyProvider).isNotEmpty;
+            final hasKey = ref.watch(effectiveApiKeyProvider).isNotEmpty;
+            final hasRemote = ref.watch(hasRemoteKeyProvider);
             final providerName = ref.watch(currentAiProvider).displayName;
             final model = ref.watch(selectedAiModel).isNotEmpty
                 ? ref.watch(selectedAiModel)
@@ -293,7 +307,7 @@ class _AiChatScreenState extends ConsumerState<AiChatScreen> {
                   onPressed: _showSettingsDialog,
                   icon: Icon(hasKey ? Icons.check_circle : Icons.key, color: hasKey ? AppColors.success : AppColors.gold),
                   label: Text(
-                    hasKey ? 'مضبوط ✓' : 'إعداد المفتاح',
+                    hasKey ? (hasRemote ? 'مفعل تلقائياً ✓' : 'مضبوط ✓') : 'إعداد المفتاح',
                     style: TextStyle(color: hasKey ? AppColors.success : AppColors.gold, fontFamily: 'Amiri', fontSize: 14),
                   ),
                 ),

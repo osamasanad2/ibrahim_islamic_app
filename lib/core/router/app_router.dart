@@ -25,6 +25,12 @@ import '../../features/onboarding/presentation/onboarding_screen.dart';
 import '../../features/mosque_map/presentation/mosque_map_screen.dart';
 import '../../features/sadaqah/presentation/sadaqah_screen.dart';
 import '../../features/wird/presentation/wird_screen.dart';
+import '../../features/books/presentation/islamic_books_screen.dart';
+import '../../features/books/presentation/book_reader_screen.dart';
+import '../../features/quran/presentation/quran_search_screen.dart';
+import '../../features/quran/presentation/bookmarks_screen.dart';
+import '../../features/quran/presentation/surah_reader_screen.dart';
+import '../../data/quran/surah_meta.dart';
 import '../di/onboarding_provider.dart';
 
 part 'app_router.g.dart';
@@ -65,6 +71,33 @@ GoRouter appRouter(AppRouterRef ref) {
       GoRoute(path: '/mosque-map', builder: (context, state) => const MosqueMapScreen()),
       GoRoute(path: '/sadaqah', builder: (context, state) => const SadaqahScreen()),
       GoRoute(path: '/wird', builder: (context, state) => const WirdScreen()),
+      GoRoute(path: '/quran-search', builder: (context, state) => const QuranSearchScreen()),
+      GoRoute(path: '/bookmarks', builder: (context, state) => const BookmarksScreen()),
+      GoRoute(path: '/books', builder: (context, state) => const IslamicBooksScreen()),
+      GoRoute(
+        path: '/book-reader/:id',
+        builder: (context, state) {
+          final id = int.tryParse(state.pathParameters['id'] ?? '') ?? 1;
+          return BookReaderScreen(bookId: id);
+        },
+      ),
+      GoRoute(
+        path: '/surah-reader',
+        builder: (context, state) {
+          final extra = state.extra as Map<String, dynamic>?;
+          final sn = extra?['surah'] as int? ?? 1;
+          final readerSurah = SurahMeta(
+            number: sn,
+            nameArabic: extra?['surahName'] as String? ?? 'سورة $sn',
+            nameEnglish: '',
+            nameTransliteration: '',
+            ayahs: 0,
+            revelationType: '',
+            startPage: 0,
+          );
+          return SurahReaderScreen(surah: readerSurah, initialAyah: extra?['ayah'] as int?);
+        },
+      ),
       GoRoute(path: '/onboarding', builder: (context, state) => const OnboardingScreen()),
     ],
   );

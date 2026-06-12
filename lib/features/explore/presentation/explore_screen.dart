@@ -28,13 +28,13 @@ class _ExploreScreenState extends State<ExploreScreen> {
     {'emoji': '🤲', 'name': 'أدعية القرآن', 'detail': '40+ دعاء', 'category': 'الأدعية', 'route': '/dua'},
     {'emoji': '📜', 'name': 'الأربعون النووية', 'detail': '42 حديثاً', 'category': 'الأحاديث', 'route': '/hadith'},
     {'emoji': '⭐', 'name': 'رياض الصالحين', 'detail': '1903 حديث', 'category': 'الأحاديث', 'route': '/hadith'},
-    {'emoji': '📚', 'name': 'المكتبة الإسلامية', 'detail': '200+ كتاب', 'category': 'الكتب', 'route': null},
     {'emoji': '📍', 'name': 'خريطة المساجد', 'detail': 'مساجد قريبة منك', 'category': 'الكل', 'route': '/mosque-map'},
     {'emoji': '🎧', 'name': 'استماع القرآن', 'detail': 'تلاوة السور', 'category': 'الكل', 'route': '/surah-audio'},
     {'emoji': '💝', 'name': 'تتبع الصدقة', 'detail': 'سجل صدقاتك', 'category': 'الكل', 'route': '/sadaqah'},
     {'emoji': '📋', 'name': 'الورد اليومي', 'detail': 'برنامجك الروحي', 'category': 'الكل', 'route': '/wird'},
-
-
+    {'emoji': '🔍', 'name': 'البحث في القرآن', 'detail': 'ابحث عن أي آية', 'category': 'الكل', 'route': '/quran-search'},
+    {'emoji': '📑', 'name': 'العلامات المرجعية', 'detail': 'آياتك المحفوظة', 'category': 'الكل', 'route': '/bookmarks'},
+    {'emoji': '📚', 'name': 'المكتبة الإسلامية', 'detail': '200+ كتاب', 'category': 'الكتب', 'route': '/books'},
   ];
 
   List<Map<String, dynamic>> get _filtered {

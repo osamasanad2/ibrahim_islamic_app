@@ -2,7 +2,6 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../../../core/constants/app_colors.dart';
-import '../../../core/constants/app_dimensions.dart';
 
 enum UserMood { anxious, grateful, sad, happy, fearful, sick, tired, hopeful }
 
@@ -40,11 +39,14 @@ class DuaScreen extends StatefulWidget {
   State<DuaScreen> createState() => _DuaScreenState();
 }
 
-class _DuaScreenState extends State<DuaScreen> {
+class _DuaScreenState extends State<DuaScreen> with TickerProviderStateMixin {
   List<Dua> _allDuas = [];
   List<Dua> _filtered = [];
+  List<String> _categories = [];
+  String _selectedCategory = 'الكل';
   UserMood? _selectedMood;
   bool _loading = true;
+  late TabController _tabController;
 
   final Map<UserMood, Map<String, dynamic>> _moodData = {
     UserMood.anxious:  {'emoji': '😰', 'label': 'قلق', 'tags': ['anxiety', 'worry', 'stress']},
@@ -66,25 +68,62 @@ class _DuaScreenState extends State<DuaScreen> {
   Future<void> _loadDuas() async {
     final str = await rootBundle.loadString('assets/dua/duas.json');
     final data = json.decode(str) as Map<String, dynamic>;
-    final duas = (data['duas'] as List).map((e) => Dua.fromJson(e as Map<String, dynamic>)).toList();
+    final rawCategories = (data['categories'] as List).cast<String>();
+    final duas = (data['duas'] as List)
+        .map((e) => Dua.fromJson(e as Map<String, dynamic>))
+        .toList();
     setState(() {
       _allDuas = duas;
+      _categories = ['الكل', ...rawCategories];
       _filtered = duas;
       _loading = false;
+      _tabController = TabController(length: _categories.length, vsync: this);
+      _tabController.addListener(_onTabChanged);
     });
   }
 
-  void _selectMood(UserMood mood) {
+  void _onTabChanged() {
+    if (!_tabController.indexIsChanging) {
+      setState(() {
+        _selectedCategory = _categories[_tabController.index];
+        _applyFilters();
+      });
+    }
+  }
+
+  void _selectCategory(String category) {
+    final index = _categories.indexOf(category);
+    if (index >= 0) {
+      _tabController.animateTo(index);
+    }
+  }
+
+  void _selectMood(UserMood? mood) {
     setState(() {
-      if (_selectedMood == mood) {
-        _selectedMood = null;
-        _filtered = _allDuas;
-      } else {
-        _selectedMood = mood;
-        final tags = (_moodData[mood]!['tags'] as List).cast<String>();
-        _filtered = _allDuas.where((d) => d.tags.any(tags.contains)).toList();
-      }
+      _selectedMood = _selectedMood == mood ? null : mood;
+      _applyFilters();
     });
+  }
+
+  void _applyFilters() {
+    List<Dua> result = _allDuas;
+
+    if (_selectedCategory != 'الكل') {
+      result = result.where((d) => d.category == _selectedCategory).toList();
+    }
+
+    if (_selectedMood != null) {
+      final tags = (_moodData[_selectedMood]!['tags'] as List).cast<String>();
+      result = result.where((d) => d.tags.any(tags.contains)).toList();
+    }
+
+    _filtered = result;
+  }
+
+  @override
+  void dispose() {
+    _tabController.dispose();
+    super.dispose();
   }
 
   @override
@@ -98,98 +137,147 @@ class _DuaScreenState extends State<DuaScreen> {
       ),
       body: _loading
           ? const Center(child: CircularProgressIndicator(color: AppColors.gold))
-          : CustomScrollView(
-              slivers: [
-                SliverToBoxAdapter(child: _buildMoodEngine()),
-                SliverPadding(
-                  padding: const EdgeInsets.all(AppDimensions.lg),
-                  sliver: SliverList(
-                    delegate: SliverChildBuilderDelegate(
-                      (context, index) => _DuaCard(dua: _filtered[index]),
-                      childCount: _filtered.length,
-                    ),
-                  ),
-                ),
-              ],
+          : Directionality(
+              textDirection: TextDirection.rtl,
+              child: Column(
+                children: [
+                  _buildCategoryTabs(),
+                  _buildMoodChips(),
+                  if (_selectedMood != null || _selectedCategory != 'الكل')
+                    _buildFilterInfo(),
+                  Expanded(child: _buildDuaList()),
+                ],
+              ),
             ),
     );
   }
 
-  Widget _buildMoodEngine() {
+  Widget _buildCategoryTabs() {
     return Container(
-      padding: const EdgeInsets.all(AppDimensions.lg),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Text(
-            'محرك الدعاء الذكي',
-            style: TextStyle(
-              color: AppColors.gold,
-              fontFamily: 'Amiri',
-              fontSize: 22,
-              fontWeight: FontWeight.w700,
-            ),
-          ),
-          const SizedBox(height: AppDimensions.xs),
-          const Text(
-            'كيف تشعر الآن؟',
-            style: TextStyle(
-              color: AppColors.textOnDarkMuted,
-              fontFamily: 'Inter',
-              fontSize: 13,
-            ),
-          ),
-          const SizedBox(height: AppDimensions.md),
-          Wrap(
-            spacing: AppDimensions.sm,
-            runSpacing: AppDimensions.sm,
-            children: _moodData.entries.map((e) {
-              final selected = _selectedMood == e.key;
-              return GestureDetector(
+      height: 48,
+      margin: const EdgeInsets.only(top: 8),
+      child: TabBar(
+        controller: _tabController,
+        isScrollable: true,
+        indicatorColor: AppColors.gold,
+        indicatorWeight: 3,
+        labelColor: AppColors.gold,
+        unselectedLabelColor: AppColors.textOnDarkMuted,
+        labelStyle: const TextStyle(
+          fontFamily: 'Amiri',
+          fontSize: 16,
+          fontWeight: FontWeight.w700,
+        ),
+        unselectedLabelStyle: const TextStyle(
+          fontFamily: 'Amiri',
+          fontSize: 14,
+        ),
+        tabAlignment: TabAlignment.start,
+        tabs: _categories.map((cat) => Tab(text: cat)).toList(),
+      ),
+    );
+  }
+
+  Widget _buildMoodChips() {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      child: SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        child: Row(
+          children: _moodData.entries.map((e) {
+            final selected = _selectedMood == e.key;
+            return Padding(
+              padding: const EdgeInsets.only(left: 8),
+              child: GestureDetector(
                 onTap: () => _selectMood(e.key),
                 child: AnimatedContainer(
                   duration: const Duration(milliseconds: 200),
                   padding: const EdgeInsets.symmetric(
-                      horizontal: AppDimensions.md, vertical: AppDimensions.sm),
+                      horizontal: 14, vertical: 8),
                   decoration: BoxDecoration(
                     color: selected ? AppColors.gold : AppColors.navyLight,
-                    borderRadius: BorderRadius.circular(AppDimensions.radiusFull),
+                    borderRadius: BorderRadius.circular(20),
                     border: Border.all(
                         color: selected ? AppColors.gold : AppColors.goldMuted),
                   ),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Text(e.value['emoji'] as String, style: const TextStyle(fontSize: 16)),
-                      const SizedBox(width: AppDimensions.xs),
+                      Text(e.value['emoji'] as String,
+                          style: const TextStyle(fontSize: 14)),
+                      const SizedBox(width: 6),
                       Text(
                         e.value['label'] as String,
                         style: TextStyle(
-                          color: selected ? AppColors.navy : AppColors.textOnDark,
+                          color: selected
+                              ? AppColors.navy
+                              : AppColors.textOnDark,
                           fontFamily: 'Amiri',
-                          fontSize: 15,
-                          fontWeight: selected ? FontWeight.w700 : FontWeight.w400,
+                          fontSize: 14,
+                          fontWeight:
+                              selected ? FontWeight.w700 : FontWeight.w400,
                         ),
                       ),
                     ],
                   ),
                 ),
-              );
-            }).toList(),
+              ),
+            );
+          }).toList(),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildFilterInfo() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      child: Row(
+        children: [
+          Text(
+            '${_filtered.length} دعاء',
+            style: const TextStyle(
+              color: AppColors.goldLight,
+              fontFamily: 'Inter',
+              fontSize: 12,
+            ),
           ),
-          if (_selectedMood != null) ...[
-            const SizedBox(height: AppDimensions.md),
-            Text(
-              '${_filtered.length} دعاء مناسب',
-              style: const TextStyle(
-                color: AppColors.goldLight,
-                fontFamily: 'Inter',
-                fontSize: 13,
+          const Spacer(),
+          if (_selectedCategory != 'الكل')
+            GestureDetector(
+              onTap: () => _selectCategory('الكل'),
+              child: const Text(
+                'إظهار الكل',
+                style: TextStyle(
+                  color: AppColors.gold,
+                  fontFamily: 'Amiri',
+                  fontSize: 13,
+                ),
               ),
             ),
-          ],
         ],
       ),
+    );
+  }
+
+  Widget _buildDuaList() {
+    if (_filtered.isEmpty) {
+      return const Center(
+        child: Text(
+          'لا توجد أدعية في هذه الفئة',
+          style: TextStyle(
+            color: AppColors.textOnDarkMuted,
+            fontFamily: 'Amiri',
+            fontSize: 16,
+          ),
+        ),
+      );
+    }
+
+    return ListView.builder(
+      padding: const EdgeInsets.all(16),
+      itemCount: _filtered.length,
+      itemBuilder: (context, index) => _DuaCard(dua: _filtered[index]),
     );
   }
 }
@@ -201,11 +289,11 @@ class _DuaCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: const EdgeInsets.only(bottom: AppDimensions.md),
-      padding: const EdgeInsets.all(AppDimensions.lg),
+      margin: const EdgeInsets.only(bottom: 16),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: AppColors.navyLight,
-        borderRadius: BorderRadius.circular(AppDimensions.radiusLg),
+        borderRadius: BorderRadius.circular(12),
         border: Border.all(color: AppColors.goldMuted),
       ),
       child: Column(
@@ -221,7 +309,7 @@ class _DuaCard extends StatelessWidget {
               height: 2.0,
             ),
           ),
-          const SizedBox(height: AppDimensions.sm),
+          const SizedBox(height: 8),
           Text(
             dua.translation,
             style: const TextStyle(
@@ -232,7 +320,7 @@ class _DuaCard extends StatelessWidget {
               height: 1.6,
             ),
           ),
-          const SizedBox(height: AppDimensions.sm),
+          const SizedBox(height: 8),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -244,7 +332,21 @@ class _DuaCard extends StatelessWidget {
                   fontSize: 13,
                 ),
               ),
-              const Icon(Icons.bookmark_border, color: AppColors.textOnDarkMuted, size: 18),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                decoration: BoxDecoration(
+                  color: AppColors.goldMuted,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Text(
+                  dua.category,
+                  style: const TextStyle(
+                    color: AppColors.goldLight,
+                    fontFamily: 'Amiri',
+                    fontSize: 11,
+                  ),
+                ),
+              ),
             ],
           ),
         ],

@@ -12,13 +12,18 @@ class GeminiProvider extends AIProvider {
   @override
   String get displayName => 'Gemini (Google)';
   @override
-  String get defaultModel => 'gemini-pro';
+  String get defaultModel => 'gemini-2.0-flash';
   @override
   String get apiKeyLabel => 'مفتاح Gemini API';
   @override
   bool get needsApiKey => true;
   @override
-  List<String> get availableModels => ['gemini-pro', 'gemini-1.5-flash', 'gemini-1.5-pro'];
+  List<String> get availableModels => [
+    'gemini-2.0-flash',
+    'gemini-2.0-flash-lite',
+    'gemini-1.5-flash',
+    'gemini-1.5-pro',
+  ];
 
   @override
   Future<String> generateResponse({
@@ -27,17 +32,18 @@ class GeminiProvider extends AIProvider {
     required String model,
     required String apiKey,
   }) async {
-    final history = messages.map((m) => {
-      'parts': [{'text': '${m.isUser ? 'المستخدم' : 'إبراهيم'}: ${m.content}'}]
+    final contents = messages.map((m) => {
+      'role': m.isUser ? 'user' : 'model',
+      'parts': [{'text': m.content}]
     }).toList();
 
     final response = await dio.post(
       'https://generativelanguage.googleapis.com/v1beta/models/$model:generateContent?key=$apiKey',
       data: {
-        'contents': [
-          ...history,
-          {'parts': [{'text': systemPrompt}]}
-        ],
+        'system_instruction': {
+          'parts': [{'text': systemPrompt}]
+        },
+        'contents': contents,
       },
     );
     final candidates = response.data['candidates'] as List;
