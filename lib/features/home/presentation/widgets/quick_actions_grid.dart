@@ -30,6 +30,8 @@ class QuickActionsGrid extends StatelessWidget {
       _QuickAction(icon: Icons.female, label: 'قسم المرأة', route: '/womens-section', color: Color(0xFFEC407A)),
       _QuickAction(icon: Icons.healing, label: 'الرقية الشرعية', route: '/ruqyah', color: Color(0xFF795548)),
       _QuickAction(icon: Icons.people_outline, label: 'التحديات', route: '/social', color: Color(0xFF00BCD4)),
+      _QuickAction(icon: Icons.fingerprint, label: 'أسماء الله', route: '/names', color: Color(0xFF009688)),
+      _QuickAction(icon: Icons.auto_stories, label: 'أسباب النزول', route: '/asbab-book', color: Color(0xFFFF9800)),
     ];
 
     return Column(

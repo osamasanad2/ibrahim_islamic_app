@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/di/providers.dart';
+import 'asbab_entry.dart';
 import 'ayah_model.dart';
 import 'quran_repository.dart';
 import 'surah_meta.dart';
@@ -35,4 +36,12 @@ final asbabProvider = FutureProvider.family<String, ({int surah, int ayah})>((re
 
 final searchQuranProvider = FutureProvider.family<List<Map<String, dynamic>>, String>((ref, query) async {
   return ref.read(quranRepositoryProvider).searchQuran(query);
+});
+
+final asbabBookProvider = FutureProvider<List<AsbabEntry>>((ref) async {
+  return ref.read(quranRepositoryProvider).getAsbabBook();
+});
+
+final surahAsbabProvider = FutureProvider.family<AsbabEntry?, int>((ref, surahNumber) async {
+  return ref.read(quranRepositoryProvider).getSurahAsbab(surahNumber);
 });

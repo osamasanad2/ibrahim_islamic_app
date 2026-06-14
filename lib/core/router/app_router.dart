@@ -41,6 +41,9 @@ import '../../features/tajweed/presentation/tajweed_reader_screen.dart';
 import '../../features/womens_section/presentation/womens_section_screen.dart';
 import '../../features/ruqyah/presentation/ruqyah_screen.dart';
 import '../../features/social/presentation/social_screen.dart';
+import '../../features/quran/presentation/asbab_book_screen.dart';
+import '../../features/quran/presentation/asbab_surah_detail_screen.dart';
+import '../../data/quran/asbab_entry.dart';
 import '../../data/quran/surah_meta.dart';
 import '../di/onboarding_provider.dart';
 
@@ -93,6 +96,22 @@ GoRouter appRouter(AppRouterRef ref) {
       GoRoute(path: '/wird', builder: (context, state) => const WirdScreen()),
       GoRoute(path: '/quran-search', builder: (context, state) => const QuranSearchScreen()),
       GoRoute(path: '/bookmarks', builder: (context, state) => const BookmarksScreen()),
+      GoRoute(path: '/asbab-book', builder: (context, state) => const AsbabBookScreen()),
+      GoRoute(
+        path: '/asbab-surah',
+        builder: (context, state) {
+          final extra = state.extra as Map<String, dynamic>?;
+          final sn = extra?['surah'] as int? ?? 1;
+          final name = extra?['surahName'] as String? ?? 'سورة $sn';
+          final entryJson = extra?['entry'] as Map<String, dynamic>?;
+          final entry = entryJson != null ? AsbabEntry.fromJson(entryJson) : null;
+          return AsbabSurahDetailScreen(
+            surahNumber: sn,
+            surahName: name,
+            initialEntry: entry,
+          );
+        },
+      ),
       GoRoute(
         path: '/book-reader/:id',
         builder: (context, state) {

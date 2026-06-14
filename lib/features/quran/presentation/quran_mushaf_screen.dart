@@ -1064,24 +1064,59 @@ class _AsbabTab extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final async = ref.watch(asbabProvider((surah: surah, ayah: ayah)));
+    final ayahAsync = ref.watch(asbabProvider((surah: surah, ayah: ayah)));
+    final surahAsync = ref.watch(surahAsbabProvider(surah));
+
     return SingleChildScrollView(
       padding: const EdgeInsets.all(AppDimensions.lg),
-      child: async.when(
+      child: ayahAsync.when(
         loading: () => const Padding(padding: EdgeInsets.symmetric(vertical: 32), child: Center(child: CircularProgressIndicator(color: AppColors.gold))),
         error: (_, __) => const Text('تعذر تحميل سبب النزول', style: TextStyle(color: Colors.red, fontFamily: 'Amiri')),
-        data: (text) => text.isEmpty
-            ? const Text('لا يوجد سبب نزول مسجّل لهذه الآية', style: TextStyle(color: AppColors.textOnDarkMuted, fontFamily: 'Amiri'))
-            : Container(
-                padding: const EdgeInsets.all(AppDimensions.md),
-                decoration: BoxDecoration(
-                  color: AppColors.navyLight,
-                  borderRadius: BorderRadius.circular(AppDimensions.radiusMd),
-                  border: Border.all(color: AppColors.goldMuted.withValues(alpha: 0.3)),
-                ),
-                child: Text(text, textAlign: TextAlign.justify, textDirection: TextDirection.rtl,
-                    style: const TextStyle(color: AppColors.textOnDark, fontFamily: 'Amiri', fontSize: 15, height: 1.6)),
+        data: (text) {
+          if (text.isNotEmpty) {
+            return Container(
+              padding: const EdgeInsets.all(AppDimensions.md),
+              decoration: BoxDecoration(
+                color: AppColors.navyLight,
+                borderRadius: BorderRadius.circular(AppDimensions.radiusMd),
+                border: Border.all(color: AppColors.goldMuted.withValues(alpha: 0.3)),
               ),
+              child: Text(text, textAlign: TextAlign.justify, textDirection: TextDirection.rtl,
+                  style: const TextStyle(color: AppColors.textOnDark, fontFamily: 'Amiri', fontSize: 15, height: 1.6)),
+            );
+          }
+
+          return surahAsync.when(
+            loading: () => const Padding(padding: EdgeInsets.symmetric(vertical: 32), child: Center(child: CircularProgressIndicator(color: AppColors.gold))),
+            error: (_, __) => const Text('لا يوجد سبب نزول مسجّل لهذه الآية', style: TextStyle(color: AppColors.textOnDarkMuted, fontFamily: 'Amiri')),
+            data: (surahEntry) => surahEntry == null
+                ? const Text('لا يوجد سبب نزول مسجّل لهذه الآية', style: TextStyle(color: AppColors.textOnDarkMuted, fontFamily: 'Amiri'))
+                : Container(
+                    padding: const EdgeInsets.all(AppDimensions.md),
+                    decoration: BoxDecoration(
+                      color: AppColors.navyLight,
+                      borderRadius: BorderRadius.circular(AppDimensions.radiusMd),
+                      border: Border.all(color: AppColors.goldMuted.withValues(alpha: 0.3)),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                          decoration: BoxDecoration(
+                            color: AppColors.gold.withValues(alpha: 0.15),
+                            borderRadius: BorderRadius.circular(AppDimensions.radiusSm),
+                          ),
+                          child: const Text('سبب نزول السورة', style: TextStyle(color: AppColors.gold, fontFamily: 'Amiri', fontSize: 12)),
+                        ),
+                        const SizedBox(height: AppDimensions.sm),
+                        Text(surahEntry.text, textAlign: TextAlign.justify, textDirection: TextDirection.rtl,
+                            style: const TextStyle(color: AppColors.textOnDark, fontFamily: 'Amiri', fontSize: 15, height: 1.6)),
+                      ],
+                    ),
+                  ),
+          );
+        },
       ),
     );
   }

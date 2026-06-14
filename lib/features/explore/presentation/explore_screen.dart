@@ -36,6 +36,7 @@ class _ExploreScreenState extends State<ExploreScreen> {
     {'emoji': '📋', 'name': 'الورد اليومي', 'detail': 'برنامجك الروحي', 'category': 'الكل', 'route': '/wird'},
     {'emoji': '🔍', 'name': 'البحث في القرآن', 'detail': 'ابحث عن أي آية', 'category': 'الكل', 'route': '/quran-search'},
     {'emoji': '📑', 'name': 'العلامات المرجعية', 'detail': 'آياتك المحفوظة', 'category': 'الكل', 'route': '/bookmarks'},
+    {'emoji': '📖', 'name': 'كتاب أسباب النزول', 'detail': 'أسباب نزول الآيات والسور', 'category': 'التفسير', 'route': '/asbab-book'},
     {'emoji': '📚', 'name': 'المكتبة الإسلامية', 'detail': '200+ كتاب', 'category': 'الكتب', 'route': '/books'},
     {'emoji': '🕌', 'name': 'السيرة النبوية', 'detail': 'الرحيق المختوم ومصادر أخرى', 'category': 'السيرة', 'route': '/seerah'},
     {'emoji': '📖', 'name': 'الرحيق المختوم', 'detail': 'السيرة النبوية الكاملة', 'category': 'السيرة', 'route': '/seerah'},

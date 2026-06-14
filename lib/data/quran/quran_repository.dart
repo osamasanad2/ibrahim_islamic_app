@@ -4,6 +4,7 @@ import 'package:dio/dio.dart';
 import 'ayah_model.dart';
 import 'surah_meta.dart';
 import 'tafsir_edition.dart';
+import 'asbab_entry.dart';
 
 class QuranRepository {
   final Dio dio;
@@ -192,6 +193,25 @@ class QuranRepository {
       return data['$surahNumber:$ayahNumber'] as String? ?? '';
     } catch (_) {
       return '';
+    }
+  }
+
+  List<AsbabEntry>? _cachedAsbabBook;
+
+  Future<List<AsbabEntry>> getAsbabBook() async {
+    if (_cachedAsbabBook != null) return _cachedAsbabBook!;
+    final json = await rootBundle.loadString('assets/tafsir/asbab_book.json');
+    final list = jsonDecode(json) as List;
+    _cachedAsbabBook = list.map((e) => AsbabEntry.fromJson(e as Map<String, dynamic>)).toList();
+    return _cachedAsbabBook!;
+  }
+
+  Future<AsbabEntry?> getSurahAsbab(int surahNumber) async {
+    final book = await getAsbabBook();
+    try {
+      return book.firstWhere((e) => e.surahNumber == surahNumber && e.type == 'general');
+    } catch (_) {
+      return null;
     }
   }
 
