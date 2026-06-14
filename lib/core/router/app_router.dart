@@ -36,6 +36,7 @@ import '../../features/fiqh/presentation/fiqh_screen.dart';
 import '../../features/quran/presentation/quran_search_screen.dart';
 import '../../features/quran/presentation/bookmarks_screen.dart';
 import '../../features/quran/presentation/surah_reader_screen.dart';
+import '../../features/tajweed/presentation/tajweed_index_screen.dart';
 import '../../features/tajweed/presentation/tajweed_reader_screen.dart';
 import '../../features/womens_section/presentation/womens_section_screen.dart';
 import '../../features/ruqyah/presentation/ruqyah_screen.dart';
@@ -63,6 +64,9 @@ GoRouter appRouter(AppRouterRef ref) {
           GoRoute(path: '/seerah', builder: (context, state) => const SeerahScreen()),
           GoRoute(path: '/adhkar', builder: (context, state) => const AdhkarScreen()),
           GoRoute(path: '/azkar', builder: (context, state) => const AdhkarScreen()),
+          GoRoute(path: '/morning-adhkar', builder: (context, state) => const AdhkarScreen(initialMainTab: 0, initialTimeTab: 0)),
+          GoRoute(path: '/evening-adhkar', builder: (context, state) => const AdhkarScreen(initialMainTab: 0, initialTimeTab: 1)),
+          GoRoute(path: '/occasions-adhkar', builder: (context, state) => const AdhkarScreen(initialMainTab: 1, initialTimeTab: 0)),
           GoRoute(path: '/profile', builder: (context, state) => const ProfileScreen()),
           GoRoute(path: '/family', builder: (context, state) => const FamilyHubScreen()),
           GoRoute(path: '/womens-section', builder: (context, state) => const WomensSectionScreen()),
@@ -119,8 +123,10 @@ GoRouter appRouter(AppRouterRef ref) {
         path: '/tajweed-reader',
         builder: (context, state) {
           final extra = state.extra as Map<String, dynamic>?;
-          final sn = extra?['surah'] as int? ?? 1;
-          return TajweedReaderScreen(surahNumber: sn, surahName: extra?['surahName'] as String?);
+          if (extra != null && extra.containsKey('surah')) {
+            return TajweedReaderScreen(surahNumber: extra['surah'] as int, surahName: extra['surahName'] as String?);
+          }
+          return const TajweedIndexScreen();
         },
       ),
       GoRoute(path: '/global-search', builder: (context, state) => const GlobalSearchScreen()),
