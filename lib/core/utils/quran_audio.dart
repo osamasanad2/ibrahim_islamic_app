@@ -1,15 +1,24 @@
-class QuranAudio {
-  static const String _baseUrl = 'https://server8.mp3quran.net';
+class ReciterInfo {
+  final String code;
+  final String baseUrl;
+  const ReciterInfo({required this.code, required this.baseUrl});
+}
 
-  static const Map<String, String> reciters = {
-    'العفاسي': 'afs',
-    'المنشاوي': 'msh',
-    'عبد الباسط': 'abd_basit',
+class QuranAudio {
+  static const Map<String, ReciterInfo> reciters = {
+    'العفاسي': ReciterInfo(code: 'afs', baseUrl: 'https://server8.mp3quran.net/afs'),
+    'المنشاوي': ReciterInfo(code: 'minsh', baseUrl: 'https://server10.mp3quran.net/minsh'),
+    'عبد الباسط': ReciterInfo(code: 'basit', baseUrl: 'https://server7.mp3quran.net/basit'),
+    'ماهر المعيقلي': ReciterInfo(code: 'maher', baseUrl: 'https://server12.mp3quran.net/maher'),
   };
 
-  static String getSurahUrl(int surahNumber, {String reciterKey = 'afs'}) {
+  static String getSurahUrl(int surahNumber, {String reciterCode = 'afs'}) {
     final num = surahNumber.toString().padLeft(3, '0');
-    return '$_baseUrl/$reciterKey/$num.mp3';
+    final entry = reciters.values.firstWhere(
+      (r) => r.code == reciterCode,
+      orElse: () => reciters.values.first,
+    );
+    return '${entry.baseUrl}/$num.mp3';
   }
 
   static String getAyahUrl(int surahNumber, int ayahNumber) {

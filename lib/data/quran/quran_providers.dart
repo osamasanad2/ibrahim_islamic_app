@@ -3,7 +3,6 @@ import '../../core/di/providers.dart';
 import 'ayah_model.dart';
 import 'quran_repository.dart';
 import 'surah_meta.dart';
-import 'word_meaning.dart';
 import 'tafsir_edition.dart';
 
 final quranRepositoryProvider = Provider<QuranRepository>((ref) {
@@ -28,10 +27,6 @@ final tafsirProvider = FutureProvider.family<String, ({int surah, int ayah})>((r
 
 final multiTafsirProvider = FutureProvider.family<String, ({int surah, int ayah, TafsirEdition edition})>((ref, params) async {
   return ref.read(quranRepositoryProvider).getTafsirByEdition(params.surah, params.ayah, params.edition);
-});
-
-final wordMeaningsProvider = FutureProvider.family<List<WordMeaning>, ({int surah, int ayah})>((ref, params) async {
-  return ref.read(quranRepositoryProvider).getWordMeanings(params.surah, params.ayah);
 });
 
 final asbabProvider = FutureProvider.family<String, ({int surah, int ayah})>((ref, params) async {

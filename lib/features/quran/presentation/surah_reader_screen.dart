@@ -204,7 +204,7 @@ class _TafsirSheetState extends ConsumerState<_TafsirSheet> with SingleTickerPro
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 3, vsync: this);
+    _tabController = TabController(length: 2, vsync: this);
   }
 
   @override
@@ -215,7 +215,7 @@ class _TafsirSheetState extends ConsumerState<_TafsirSheet> with SingleTickerPro
 
   @override
   Widget build(BuildContext context) {
-    const tabLabels = ['التفسير', 'معاني الكلمات', 'أسباب النزول'];
+    const tabLabels = ['التفسير', 'أسباب النزول'];
 
     return Container(
       height: MediaQuery.of(context).size.height * 0.65,
@@ -249,7 +249,6 @@ class _TafsirSheetState extends ConsumerState<_TafsirSheet> with SingleTickerPro
               controller: _tabController,
               children: [
                 _MultiTafsirTab(surah: widget.surah, ayah: widget.ayah),
-                _WordMeaningsTab(surah: widget.surah, ayah: widget.ayah),
                 _AsbabTab(surah: widget.surah, ayah: widget.ayah),
               ],
             ),
@@ -326,61 +325,6 @@ class _MultiTafsirTabState extends ConsumerState<_MultiTafsirTab> {
           ),
         ),
       ],
-    );
-  }
-}
-
-class _WordMeaningsTab extends ConsumerWidget {
-  final int surah;
-  final int ayah;
-  const _WordMeaningsTab({required this.surah, required this.ayah});
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final async = ref.watch(wordMeaningsProvider((surah: surah, ayah: ayah)));
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(AppDimensions.lg),
-      child: async.when(
-        loading: () => const Padding(padding: EdgeInsets.symmetric(vertical: 32), child: Center(child: CircularProgressIndicator(color: AppColors.gold))),
-        error: (_, __) => const Text('تعذر تحميل معاني الكلمات', style: TextStyle(color: Colors.red, fontFamily: 'Amiri')),
-        data: (words) {
-          if (words.isEmpty) {
-            return const Text('غير متصل — معاني الكلمات غير متاحة حالياً', style: TextStyle(color: AppColors.textOnDarkMuted, fontFamily: 'Amiri'));
-          }
-          return Column(
-            children: words.map((w) => Container(
-              margin: const EdgeInsets.only(bottom: 8),
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: AppColors.navyLight,
-                borderRadius: BorderRadius.circular(AppDimensions.radiusMd),
-                border: Border.all(color: AppColors.goldMuted.withValues(alpha: 0.2)),
-              ),
-              child: Row(
-                children: [
-                  Container(
-                    width: 32, height: 32,
-                    decoration: const BoxDecoration(color: AppColors.goldMuted, shape: BoxShape.circle),
-                    child: Center(child: Text('${w.position}', style: const TextStyle(color: AppColors.gold, fontFamily: 'Inter', fontSize: 11, fontWeight: FontWeight.w700))),
-                  ),
-                  const SizedBox(width: 12),
-                  Text(w.arabic, textDirection: TextDirection.rtl, style: const TextStyle(color: AppColors.gold, fontFamily: 'Amiri', fontSize: 18, fontWeight: FontWeight.bold)),
-                  const Spacer(),
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                    decoration: BoxDecoration(
-                      color: AppColors.navy,
-                      borderRadius: BorderRadius.circular(AppDimensions.radiusFull),
-                      border: Border.all(color: AppColors.goldMuted.withValues(alpha: 0.3)),
-                    ),
-                    child: Text(w.translation, style: const TextStyle(color: AppColors.goldLight, fontFamily: 'Inter', fontSize: 11)),
-                  ),
-                ],
-              ),
-            )).toList(),
-          );
-        },
-      ),
     );
   }
 }

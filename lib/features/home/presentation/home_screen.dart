@@ -8,9 +8,9 @@ import '../../../core/di/providers.dart';
 import '../../../core/storage/local_storage.dart';
 import '../../../core/utils/daily_hadith.dart';
 import '../../../core/utils/daily_suggestion.dart';
+import 'dart:async';
 import '../../../core/utils/date_utils.dart';
-import 'widgets/prayer_countdown_card.dart';
-import 'widgets/daily_verse_card.dart';
+import '../../../core/utils/prayer_calculator.dart';
 import 'widgets/progress_tracker_row.dart';
 import 'widgets/quick_actions_grid.dart';
 import 'widgets/continue_reading_card.dart';
@@ -29,7 +29,7 @@ class HomeScreen extends ConsumerWidget {
 
   static const _dayNames = ['الاثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة', 'السبت', 'الأحد'];
   static const _hijriMonths = ['محرم', 'صفر', 'ربيع الأول', 'ربيع الثاني', 'جمادى الأولى', 'جمادى الآخرة', 'رجب', 'شعبان', 'رمضان', 'شوال', 'ذو القعدة', 'ذو الحجة'];
-  static const _miladiMonths = ['يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو', 'يوليو', 'أغسطس', 'سبتمبر', 'أكتوبر', 'نوفمبر', 'ديسمبر'];
+
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -41,7 +41,6 @@ class HomeScreen extends ConsumerWidget {
     final today = HijriCalendar.now();
     final dayName = _dayNames[now.weekday - 1];
     final hijriMonth = _hijriMonths[today.hMonth - 1];
-    final miladiMonth = _miladiMonths[now.month - 1];
     final suggestion = DailySuggestion.getForToday();
 
     return Scaffold(
@@ -58,154 +57,107 @@ class HomeScreen extends ConsumerWidget {
                 delegate: SliverChildListDelegate([
                   const SizedBox(height: AppDimensions.sm),
 
-                  // ========== DATE SECTION ==========
-                  GestureDetector(
-                    onTap: () => context.push('/calendar'),
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(vertical: AppDimensions.md, horizontal: AppDimensions.lg),
-                      decoration: BoxDecoration(
-                        gradient: const LinearGradient(
-                          colors: [Color(0xFF1A2C4E), Color(0xFF0F1C3A)],
-                          begin: Alignment.topRight,
-                          end: Alignment.bottomLeft,
-                        ),
-                        borderRadius: BorderRadius.circular(AppDimensions.radiusXl),
-                        border: Border.all(color: AppColors.goldMuted),
-                      ),
-                  child: Column(
+                  // ========== DATE + PRAYER ROW ==========
+                  Row(
                     children: [
-                      const Icon(Icons.calendar_month, color: AppColors.gold, size: 22),
-                      const SizedBox(height: AppDimensions.xs),
-                      Text(
-                        dayName,
-                        style: const TextStyle(
-                          color: AppColors.gold,
-                          fontFamily: 'Amiri',
-                          fontSize: 20,
-                          fontWeight: FontWeight.w700,
+                      Expanded(
+                        flex: 2,
+                        child: GestureDetector(
+                          onTap: () => context.push('/calendar'),
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(vertical: 8, horizontal: AppDimensions.sm),
+                            decoration: BoxDecoration(
+                              color: AppColors.navyLight,
+                              borderRadius: BorderRadius.circular(AppDimensions.radiusMd),
+                              border: Border.all(color: AppColors.goldMuted),
+                            ),
+                            child: Column(
+                              children: [
+                                const Icon(Icons.calendar_month, color: AppColors.gold, size: 14),
+                                const SizedBox(height: 2),
+                                Text(dayName, style: const TextStyle(color: AppColors.gold, fontFamily: 'Amiri', fontSize: 11, fontWeight: FontWeight.w700)),
+                                const SizedBox(height: 2),
+                                Text('${today.hDay} $hijriMonth', style: const TextStyle(color: AppColors.textOnDarkMuted, fontFamily: 'Amiri', fontSize: 10)),
+                              ],
+                            ),
+                          ),
                         ),
                       ),
-                      const SizedBox(height: AppDimensions.sm),
-                      Row(
-                        children: [
-                          Expanded(
-                            child: Container(
-                              padding: const EdgeInsets.symmetric(vertical: AppDimensions.xs, horizontal: AppDimensions.sm),
-                                  decoration: BoxDecoration(
-                                    color: AppColors.navy,
-                                    borderRadius: BorderRadius.circular(AppDimensions.radiusMd),
-                                    border: Border.all(color: AppColors.goldMuted),
-                                  ),
-                                  child: Column(
-                                    children: [
-                                      const Text('التاريخ الهجري',
-                                        style: TextStyle(color: AppColors.goldMuted, fontFamily: 'Inter', fontSize: 9)),
-                                      const SizedBox(height: 2),
-                                      Text(
-                                        '${today.hDay} $hijriMonth ${today.hYear} هـ',
-                                        textAlign: TextAlign.center,
-                                        style: const TextStyle(color: AppColors.goldLight, fontFamily: 'Amiri', fontSize: 13, fontWeight: FontWeight.w600),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ),
-                              const SizedBox(width: AppDimensions.sm),
-                              Expanded(
-                                child: Container(
-                                  padding: const EdgeInsets.symmetric(vertical: AppDimensions.sm, horizontal: AppDimensions.md),
-                                  decoration: BoxDecoration(
-                                    color: AppColors.navy,
-                                    borderRadius: BorderRadius.circular(AppDimensions.radiusMd),
-                                    border: Border.all(color: AppColors.goldMuted),
-                                  ),
-                                  child: Column(
-                                    children: [
-                                      const Text('التاريخ الميلادي',
-                                        style: TextStyle(color: AppColors.goldMuted, fontFamily: 'Inter', fontSize: 9)),
-                                      const SizedBox(height: 2),
-                                      Text(
-                                        '${now.day} $miladiMonth ${now.year}م',
-                                        textAlign: TextAlign.center,
-                                        style: const TextStyle(color: AppColors.textOnDark, fontFamily: 'Amiri', fontSize: 13, fontWeight: FontWeight.w600),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ),
-                            ],
+                      const SizedBox(width: AppDimensions.sm),
+                      Expanded(
+                        flex: 5,
+                        child: scheduleAsync.when(
+                          loading: () => Container(
+                            height: 60,
+                            decoration: BoxDecoration(
+                              color: AppColors.navyLight,
+                              borderRadius: BorderRadius.circular(AppDimensions.radiusMd),
+                            ),
+                            child: const Center(child: SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.gold))),
                           ),
-                        ],
+                          error: (_, __) => Container(
+                            height: 60,
+                            decoration: BoxDecoration(
+                              color: AppColors.navyLight,
+                              borderRadius: BorderRadius.circular(AppDimensions.radiusMd),
+                            ),
+                            child: const Center(child: Icon(Icons.error_outline, color: AppColors.goldMuted)),
+                          ),
+                          data: (schedule) => _CompactPrayerCard(schedule: schedule),
+                        ),
                       ),
-                    ),
-                  ),
-                  const SizedBox(height: AppDimensions.md),
-
-                  // ========== PRAYER TIMES ==========
-                  scheduleAsync.when(
-                    loading: () => const _LoadingCard(),
-                    error: (_, __) => const _LoadingCard(),
-                    data: (schedule) => PrayerCountdownCard(schedule: schedule),
+                    ],
                   ),
                   const SizedBox(height: AppDimensions.sm),
 
-                  // ========== SUGGESTION OF THE DAY ==========
+                  // ========== SUGGESTION OF THE DAY (compact) ==========
                   Container(
-                    padding: const EdgeInsets.fromLTRB(AppDimensions.md, AppDimensions.sm, AppDimensions.md, AppDimensions.sm),
+                    padding: const EdgeInsets.symmetric(horizontal: AppDimensions.md, vertical: 6),
                     decoration: BoxDecoration(
                       color: AppColors.navyLight,
-                      borderRadius: BorderRadius.circular(AppDimensions.radiusLg),
+                      borderRadius: BorderRadius.circular(AppDimensions.radiusMd),
                       border: Border.all(color: AppColors.goldMuted),
                     ),
                     child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
-                        Text(suggestion.icon ?? '🌟', style: const TextStyle(fontSize: 22)),
+                        Text(suggestion.icon ?? '🌟', style: const TextStyle(fontSize: 16)),
                         const SizedBox(width: AppDimensions.sm),
                         Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                suggestion.title,
-                                style: const TextStyle(color: AppColors.gold, fontFamily: 'Inter', fontSize: 12, fontWeight: FontWeight.w600),
-                              ),
-                              const SizedBox(height: 4),
-                              Text(
-                                suggestion.text,
-                                textDirection: TextDirection.rtl,
-                                style: const TextStyle(color: AppColors.textOnDark, fontFamily: 'Amiri', fontSize: 14, height: 1.6),
-                              ),
-                            ],
+                          child: Text(
+                            suggestion.text,
+                            textDirection: TextDirection.rtl,
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(color: AppColors.textOnDark, fontFamily: 'Amiri', fontSize: 13, height: 1.4),
                           ),
                         ),
                       ],
                     ),
                   ),
-                  const SizedBox(height: AppDimensions.sm),
+                  const SizedBox(height: AppDimensions.xs),
 
-                  // ========== AYAH OF THE DAY ==========
+                  // ========== AYAH OF THE DAY (compact) ==========
                   verseAsync.when(
                     loading: () => const SizedBox.shrink(),
                     error: (_, __) => const SizedBox.shrink(),
-                    data: (verse) => DailyVerseCard(verse: verse),
+                    data: (verse) => _CompactVerseCard(verse: verse),
                   ),
-                  if (verseAsync.hasValue) const SizedBox(height: AppDimensions.sm),
+                  if (verseAsync.hasValue) const SizedBox(height: AppDimensions.xs),
 
-                  // ========== HADITH OF THE DAY ==========
+                  // ========== HADITH OF THE DAY (compact) ==========
                   hadithAsync.when(
                     loading: () => const SizedBox.shrink(),
                     error: (_, __) => const SizedBox.shrink(),
-                    data: (hadith) => _HadithCard(hadith: hadith),
+                    data: (hadith) => _CompactHadithCard(hadith: hadith),
                   ),
                   if (hadithAsync.hasValue) const SizedBox(height: AppDimensions.sm),
 
-                  // ========== CONTINUE READING ==========
-                  const ContinueReadingCard(),
-                  const SizedBox(height: AppDimensions.sm),
-
                   // ========== QUICK ACTIONS ==========
                   const QuickActionsGrid(),
+                  const SizedBox(height: AppDimensions.sm),
+
+                  // ========== CONTINUE READING ==========
+                  const ContinueReadingCard(),
                   const SizedBox(height: AppDimensions.sm),
 
                   // ========== RECENTLY USED ==========
@@ -329,67 +281,124 @@ class HomeScreen extends ConsumerWidget {
   }
 }
 
-class _HadithCard extends StatelessWidget {
-  final DailyHadith hadith;
-  const _HadithCard({required this.hadith});
+class _CompactPrayerCard extends StatefulWidget {
+  final PrayerScheduleModel schedule;
+  const _CompactPrayerCard({required this.schedule});
+
+  @override
+  State<_CompactPrayerCard> createState() => _CompactPrayerCardState();
+}
+
+class _CompactPrayerCardState extends State<_CompactPrayerCard> {
+  late Timer _timer;
+  Duration _remaining = Duration.zero;
+
+  @override
+  void initState() {
+    super.initState();
+    _update();
+    _timer = Timer.periodic(const Duration(seconds: 1), (_) {
+      if (mounted) _update();
+    });
+  }
+
+  void _update() {
+    setState(() {
+      _remaining = widget.schedule.timeUntilNextPrayer;
+    });
+  }
+
+  @override
+  void dispose() {
+    _timer.cancel();
+    super.dispose();
+  }
+
+  String _formatDuration(Duration d) {
+    if (d.isNegative) return '00:00:00';
+    final h = d.inHours.toString().padLeft(2, '0');
+    final m = (d.inMinutes % 60).toString().padLeft(2, '0');
+    final s = (d.inSeconds % 60).toString().padLeft(2, '0');
+    return '$h:$m:$s';
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: () => context.push('/prayer-times'),
+      child: Container(
+        height: 60,
+        decoration: BoxDecoration(
+          gradient: const LinearGradient(
+            colors: [Color(0xFFB8973C), AppColors.gold, Color(0xFFE8C97A)],
+            begin: Alignment.topRight,
+            end: Alignment.bottomLeft,
+          ),
+          borderRadius: BorderRadius.circular(AppDimensions.radiusMd),
+        ),
+        padding: const EdgeInsets.symmetric(horizontal: AppDimensions.sm),
+        child: Row(
+          children: [
+            const Icon(Icons.mosque, color: AppColors.navy, size: 16),
+            const SizedBox(width: 6),
+            Expanded(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    widget.schedule.nextPrayerName,
+                    style: const TextStyle(color: AppColors.navy, fontFamily: 'Amiri', fontSize: 14, fontWeight: FontWeight.w700),
+                  ),
+                  Text(
+                    'متبقي ${_formatDuration(_remaining)}',
+                    style: const TextStyle(color: AppColors.navy, fontFamily: 'Inter', fontSize: 10, fontWeight: FontWeight.w500),
+                  ),
+                ],
+              ),
+            ),
+            const Icon(Icons.arrow_forward_ios, color: AppColors.navy, size: 12),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _CompactVerseCard extends StatelessWidget {
+  final DailyVerse verse;
+  const _CompactVerseCard({required this.verse});
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(AppDimensions.md),
+      padding: const EdgeInsets.all(AppDimensions.sm),
       decoration: BoxDecoration(
         color: AppColors.navyLight,
-        borderRadius: BorderRadius.circular(AppDimensions.radiusLg),
+        borderRadius: BorderRadius.circular(AppDimensions.radiusMd),
         border: Border.all(color: AppColors.goldMuted),
       ),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Icon(Icons.chat, color: AppColors.gold, size: 14),
-              const SizedBox(width: AppDimensions.xs),
-              Text(
-                'حديث اليوم — ${hadith.number}',
-                style: const TextStyle(color: AppColors.gold, fontFamily: 'Inter', fontSize: 11, fontWeight: FontWeight.w600),
-              ),
+              const Icon(Icons.menu_book, color: AppColors.gold, size: 13),
+              const SizedBox(width: 4),
+              Text('آية اليوم', style: const TextStyle(color: AppColors.gold, fontFamily: 'Inter', fontSize: 11, fontWeight: FontWeight.w600)),
             ],
           ),
-          const SizedBox(height: AppDimensions.sm),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: AppDimensions.sm, vertical: 2),
-            decoration: BoxDecoration(
-              color: AppColors.navy,
-              borderRadius: BorderRadius.circular(AppDimensions.radiusFull),
-            ),
-            child: Text(
-              hadith.source,
-              style: const TextStyle(color: AppColors.goldMuted, fontFamily: 'Inter', fontSize: 9),
-            ),
-          ),
-          const SizedBox(height: AppDimensions.sm),
+          const SizedBox(height: 6),
           Text(
-            'عن ${hadith.narrator} رضي الله عنه قال:',
-            style: const TextStyle(color: AppColors.goldLight, fontFamily: 'Amiri', fontSize: 13, fontWeight: FontWeight.w600),
-          ),
-          const SizedBox(height: AppDimensions.xs),
-          Text(
-            '«${hadith.arabic}»',
+            '﴿ ${verse.arabic} ﴾',
+            textAlign: TextAlign.center,
             textDirection: TextDirection.rtl,
-            textAlign: TextAlign.center,
-            style: const TextStyle(color: AppColors.gold, fontFamily: 'Amiri', fontSize: 16, height: 1.8),
+            style: const TextStyle(color: AppColors.gold, fontFamily: 'Amiri', fontSize: 16, height: 1.6, fontWeight: FontWeight.w400),
           ),
-          const SizedBox(height: AppDimensions.sm),
-          Container(
-            height: 1,
-            decoration: const BoxDecoration(color: AppColors.goldMuted),
-          ),
-          const SizedBox(height: AppDimensions.sm),
+          const SizedBox(height: 2),
           Text(
-            hadith.translation,
-            textAlign: TextAlign.center,
-            style: const TextStyle(color: AppColors.textOnDarkMuted, fontFamily: 'Inter', fontSize: 12, height: 1.5),
+            '— سورة ${verse.surah}، الآية ${verse.ayah}',
+            style: const TextStyle(color: AppColors.goldMuted, fontFamily: 'Amiri', fontSize: 10),
           ),
         ],
       ),
@@ -397,18 +406,63 @@ class _HadithCard extends StatelessWidget {
   }
 }
 
-class _LoadingCard extends StatelessWidget {
-  const _LoadingCard();
+class _CompactHadithCard extends StatelessWidget {
+  final DailyHadith hadith;
+  const _CompactHadithCard({required this.hadith});
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: 120,
+      padding: const EdgeInsets.all(AppDimensions.sm),
       decoration: BoxDecoration(
         color: AppColors.navyLight,
-        borderRadius: BorderRadius.circular(AppDimensions.radiusXl),
+        borderRadius: BorderRadius.circular(AppDimensions.radiusMd),
+        border: Border.all(color: AppColors.goldMuted),
       ),
-      child: const Center(child: CircularProgressIndicator(color: AppColors.gold)),
+      child: Column(
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Icon(Icons.chat, color: AppColors.gold, size: 13),
+              const SizedBox(width: 4),
+              Text('حديث اليوم — ${hadith.number}', style: const TextStyle(color: AppColors.gold, fontFamily: 'Inter', fontSize: 11, fontWeight: FontWeight.w600)),
+            ],
+          ),
+          const SizedBox(height: 6),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: AppDimensions.sm, vertical: 2),
+            decoration: BoxDecoration(
+              color: AppColors.navy,
+              borderRadius: BorderRadius.circular(AppDimensions.radiusFull),
+            ),
+            child: Text(hadith.source, style: const TextStyle(color: AppColors.goldMuted, fontFamily: 'Inter', fontSize: 9)),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            'عن ${hadith.narrator} رضي الله عنه قال:',
+            textAlign: TextAlign.center,
+            style: const TextStyle(color: AppColors.goldLight, fontFamily: 'Amiri', fontSize: 13, fontWeight: FontWeight.w600),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            '«${hadith.arabic}»',
+            textAlign: TextAlign.center,
+            textDirection: TextDirection.rtl,
+            style: const TextStyle(color: AppColors.gold, fontFamily: 'Amiri', fontSize: 15, height: 1.6),
+          ),
+          const SizedBox(height: 4),
+          Container(height: 1, decoration: const BoxDecoration(color: AppColors.goldMuted)),
+          const SizedBox(height: 4),
+          Text(
+            hadith.translation,
+            textAlign: TextAlign.center,
+            style: const TextStyle(color: AppColors.textOnDarkMuted, fontFamily: 'Inter', fontSize: 11, height: 1.4),
+          ),
+        ],
+      ),
     );
   }
 }
+
+

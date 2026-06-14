@@ -8,8 +8,8 @@ import '../../features/explore/presentation/explore_screen.dart';
 import '../../features/ai_assistant/presentation/ai_chat_screen.dart';
 import '../../features/prayer_times/presentation/prayer_times_screen.dart';
 import '../../features/qibla/presentation/qibla_screen.dart';
-import '../../features/azkar/presentation/azkar_screen.dart';
 import '../../features/azkar/presentation/tasbeeh_screen.dart';
+import '../../features/adhkar/presentation/adhkar_screen.dart';
 import '../../features/dua/presentation/dua_screen.dart';
 import '../../features/hadith/presentation/hadith_screen.dart';
 import '../../features/spiritual_journey/presentation/journey_screen.dart';
@@ -30,10 +30,16 @@ import '../../features/sadaqah/presentation/sadaqah_screen.dart';
 import '../../features/wird/presentation/wird_screen.dart';
 import '../../features/books/presentation/islamic_books_screen.dart';
 import '../../features/books/presentation/book_reader_screen.dart';
+import '../../features/seerah/presentation/seerah_screen.dart';
 import '../../features/companions/presentation/companions_screen.dart';
+import '../../features/fiqh/presentation/fiqh_screen.dart';
 import '../../features/quran/presentation/quran_search_screen.dart';
 import '../../features/quran/presentation/bookmarks_screen.dart';
 import '../../features/quran/presentation/surah_reader_screen.dart';
+import '../../features/tajweed/presentation/tajweed_reader_screen.dart';
+import '../../features/womens_section/presentation/womens_section_screen.dart';
+import '../../features/ruqyah/presentation/ruqyah_screen.dart';
+import '../../features/social/presentation/social_screen.dart';
 import '../../data/quran/surah_meta.dart';
 import '../di/onboarding_provider.dart';
 
@@ -53,14 +59,20 @@ GoRouter appRouter(AppRouterRef ref) {
           GoRoute(path: '/', builder: (context, state) => const HomeScreen()),
           GoRoute(path: '/quran', builder: (context, state) => const QuranScreen()),
           GoRoute(path: '/explore', builder: (context, state) => const ExploreScreen()),
+          GoRoute(path: '/books', builder: (context, state) => const IslamicBooksScreen()),
+          GoRoute(path: '/seerah', builder: (context, state) => const SeerahScreen()),
+          GoRoute(path: '/adhkar', builder: (context, state) => const AdhkarScreen()),
+          GoRoute(path: '/azkar', builder: (context, state) => const AdhkarScreen()),
           GoRoute(path: '/profile', builder: (context, state) => const ProfileScreen()),
           GoRoute(path: '/family', builder: (context, state) => const FamilyHubScreen()),
+          GoRoute(path: '/womens-section', builder: (context, state) => const WomensSectionScreen()),
+          GoRoute(path: '/ruqyah', builder: (context, state) => const RuqyahScreen()),
+          GoRoute(path: '/social', builder: (context, state) => const SocialScreen()),
         ],
       ),
       GoRoute(path: '/ai-assistant', builder: (context, state) => const AiChatScreen()),
       GoRoute(path: '/prayer-times', builder: (context, state) => const PrayerTimesScreen()),
       GoRoute(path: '/qibla', builder: (context, state) => const QiblaScreen()),
-      GoRoute(path: '/azkar', builder: (context, state) => const AzkarScreen()),
       GoRoute(path: '/tasbeeh', builder: (context, state) => const TasbeehScreen()),
       GoRoute(path: '/dua', builder: (context, state) => const DuaScreen()),
       GoRoute(path: '/hadith', builder: (context, state) => const HadithScreen()),
@@ -77,7 +89,6 @@ GoRouter appRouter(AppRouterRef ref) {
       GoRoute(path: '/wird', builder: (context, state) => const WirdScreen()),
       GoRoute(path: '/quran-search', builder: (context, state) => const QuranSearchScreen()),
       GoRoute(path: '/bookmarks', builder: (context, state) => const BookmarksScreen()),
-      GoRoute(path: '/books', builder: (context, state) => const IslamicBooksScreen()),
       GoRoute(
         path: '/book-reader/:id',
         builder: (context, state) {
@@ -102,7 +113,16 @@ GoRouter appRouter(AppRouterRef ref) {
           return SurahReaderScreen(surah: readerSurah, initialAyah: extra?['ayah'] as int?);
         },
       ),
+      GoRoute(path: '/fiqh', builder: (context, state) => const FiqhScreen()),
       GoRoute(path: '/companions', builder: (context, state) => const CompanionsScreen()),
+      GoRoute(
+        path: '/tajweed-reader',
+        builder: (context, state) {
+          final extra = state.extra as Map<String, dynamic>?;
+          final sn = extra?['surah'] as int? ?? 1;
+          return TajweedReaderScreen(surahNumber: sn, surahName: extra?['surahName'] as String?);
+        },
+      ),
       GoRoute(path: '/global-search', builder: (context, state) => const GlobalSearchScreen()),
       GoRoute(path: '/onboarding', builder: (context, state) => const OnboardingScreen()),
       GoRoute(path: '/notification-settings', builder: (context, state) => const NotificationSettingsScreen()),

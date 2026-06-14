@@ -20,4 +20,8 @@ class AppStrings {
   static const dua_en = 'Dua';
   static const qibla_ar = 'القبلة';
   static const qibla_en = 'Qibla';
+  static const seerah_ar = 'السيرة';
+  static const seerah_en = 'Seerah';
+  static const books_ar = 'المكتبة';
+  static const books_en = 'Library';
 }

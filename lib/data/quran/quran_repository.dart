@@ -3,7 +3,6 @@ import 'package:flutter/services.dart';
 import 'package:dio/dio.dart';
 import 'ayah_model.dart';
 import 'surah_meta.dart';
-import 'word_meaning.dart';
 import 'tafsir_edition.dart';
 
 class QuranRepository {
@@ -184,23 +183,6 @@ class QuranRepository {
     } catch (_) {}
 
     return results;
-  }
-
-  Future<List<WordMeaning>> getWordMeanings(int surahNumber, int ayahNumber) async {
-    try {
-      final res = await dio.get(
-        'https://api.quran.com/api/v4/verses/by_key/$surahNumber:$ayahNumber',
-        queryParameters: {
-          'words': 'true',
-          'word_fields': 'text_uthmani,translation',
-        },
-      );
-      final verse = res.data['verse'] as Map<String, dynamic>;
-      final words = verse['words'] as List;
-      return words.map((w) => WordMeaning.fromJson(w as Map<String, dynamic>)).toList();
-    } catch (_) {
-      return [];
-    }
   }
 
   Future<String> getAsbabAlNuzul(int surahNumber, int ayahNumber) async {

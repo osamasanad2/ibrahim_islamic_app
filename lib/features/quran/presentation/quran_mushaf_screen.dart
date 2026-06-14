@@ -129,13 +129,13 @@ class _QuranMushafScreenState extends ConsumerState<QuranMushafScreen> {
       await audio.pause();
     } else {
       final surah = _getSurahForPage(_currentPage);
-      final url = QuranAudio.getSurahUrl(surah, reciterKey: _reciterKey);
+      final url = QuranAudio.getSurahUrl(surah, reciterCode: _reciterKey);
       await audio.play(url);
     }
   }
 
   String _reciterName() =>
-      QuranAudio.reciters.entries.firstWhere((e) => e.value == _reciterKey).key;
+      QuranAudio.reciters.entries.firstWhere((e) => e.value.code == _reciterKey).key;
 
   @override
   Widget build(BuildContext context) {
@@ -442,18 +442,18 @@ class _QuranMushafScreenState extends ConsumerState<QuranMushafScreen> {
             const Text('اختر القارئ', style: TextStyle(color: AppColors.gold, fontFamily: 'Amiri', fontSize: 20, fontWeight: FontWeight.bold)),
             const Divider(color: AppColors.goldMuted, height: 32),
             ...QuranAudio.reciters.entries.map((e) {
-              final selected = e.value == _reciterKey;
+              final selected = e.value.code == _reciterKey;
               return ListTile(
                 leading: Icon(selected ? Icons.radio_button_checked : Icons.radio_button_unchecked, color: AppColors.gold),
                 title: Text(e.key, style: TextStyle(color: Colors.white, fontFamily: 'Amiri', fontSize: 18, fontWeight: selected ? FontWeight.bold : FontWeight.normal)),
                 trailing: selected ? const Icon(Icons.check, color: AppColors.gold) : null,
                 onTap: () {
-                  setState(() => _reciterKey = e.value);
+                  setState(() => _reciterKey = e.value.code);
                   Navigator.pop(ctx);
                   final audio = ref.read(audioServiceProvider);
                   if (audio.state.playing) {
                     final surah = _getSurahForPage(_currentPage);
-                    audio.play(QuranAudio.getSurahUrl(surah, reciterKey: _reciterKey));
+                    audio.play(QuranAudio.getSurahUrl(surah, reciterCode: _reciterKey));
                   }
                 },
               );
@@ -699,7 +699,7 @@ class _TafsirTabsSheetState extends State<_TafsirTabsSheet> with SingleTickerPro
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 3, vsync: this);
+    _tabController = TabController(length: 2, vsync: this);
   }
 
   @override
@@ -737,7 +737,6 @@ class _TafsirTabsSheetState extends State<_TafsirTabsSheet> with SingleTickerPro
             labelStyle: const TextStyle(fontFamily: 'Amiri', fontSize: 16, fontWeight: FontWeight.bold),
             tabs: const [
               Tab(text: 'التفسير الميسر'),
-              Tab(text: 'معاني الكلمات'),
               Tab(text: 'أسباب النزول'),
             ],
           ),
@@ -746,7 +745,6 @@ class _TafsirTabsSheetState extends State<_TafsirTabsSheet> with SingleTickerPro
               controller: _tabController,
               children: [
                 _TafsirTab(surah: widget.surah, ayah: widget.ayah),
-                _WordMeaningsTab(surah: widget.surah, ayah: widget.ayah),
                 _AsbabTab(surah: widget.surah, ayah: widget.ayah),
               ],
             ),
@@ -776,61 +774,6 @@ class _TafsirTab extends ConsumerWidget {
           textDirection: TextDirection.rtl,
           style: const TextStyle(color: AppColors.textOnDark, fontFamily: 'Amiri', fontSize: 18, height: 1.8),
         ),
-      ),
-    );
-  }
-}
-
-class _WordMeaningsTab extends ConsumerWidget {
-  final int surah;
-  final int ayah;
-  const _WordMeaningsTab({required this.surah, required this.ayah});
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final async = ref.watch(wordMeaningsProvider((surah: surah, ayah: ayah)));
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(AppDimensions.lg),
-      child: async.when(
-        loading: () => const Padding(padding: EdgeInsets.symmetric(vertical: 32), child: Center(child: CircularProgressIndicator(color: AppColors.gold))),
-        error: (_, __) => const Text('تعذر تحميل معاني الكلمات', style: TextStyle(color: Colors.red, fontFamily: 'Amiri')),
-        data: (words) {
-          if (words.isEmpty) {
-            return const Text('معاني الكلمات غير متاحة حالياً', style: TextStyle(color: AppColors.textOnDarkMuted, fontFamily: 'Amiri'));
-          }
-          return Column(
-            children: words.map((w) => Container(
-              margin: const EdgeInsets.only(bottom: 8),
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: AppColors.navyLight,
-                borderRadius: BorderRadius.circular(AppDimensions.radiusMd),
-                border: Border.all(color: AppColors.goldMuted.withValues(alpha: 0.2)),
-              ),
-              child: Row(
-                children: [
-                  Container(
-                    width: 28, height: 28,
-                    decoration: const BoxDecoration(color: AppColors.goldMuted, shape: BoxShape.circle),
-                    child: Center(child: Text('${w.position}', style: const TextStyle(color: AppColors.gold, fontFamily: 'Inter', fontSize: 10, fontWeight: FontWeight.w700))),
-                  ),
-                  const SizedBox(width: 10),
-                  Text(w.arabic, textDirection: TextDirection.rtl, style: const TextStyle(color: AppColors.gold, fontFamily: 'Amiri', fontSize: 16, fontWeight: FontWeight.bold)),
-                  const Spacer(),
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                    decoration: BoxDecoration(
-                      color: AppColors.navy,
-                      borderRadius: BorderRadius.circular(AppDimensions.radiusFull),
-                      border: Border.all(color: AppColors.goldMuted.withValues(alpha: 0.3)),
-                    ),
-                    child: Text(w.translation, style: const TextStyle(color: AppColors.goldLight, fontFamily: 'Inter', fontSize: 10)),
-                  ),
-                ],
-              ),
-            )).toList(),
-          );
-        },
       ),
     );
   }

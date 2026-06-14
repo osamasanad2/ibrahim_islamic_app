@@ -44,6 +44,7 @@ class _SurahAudioScreenState extends ConsumerState<SurahAudioScreen> {
   Duration _position = Duration.zero;
   Duration? _duration;
   double _volume = 1.0;
+  String _reciterCode = 'afs';
 
   @override
   void initState() {
@@ -61,7 +62,7 @@ class _SurahAudioScreenState extends ConsumerState<SurahAudioScreen> {
 
   Future<void> _playSurah(int number) async {
     setState(() => _currentSurah = number);
-    await ref.read(audioServiceProvider).play(QuranAudio.getSurahUrl(number));
+    await ref.read(audioServiceProvider).play(QuranAudio.getSurahUrl(number, reciterCode: _reciterCode));
   }
 
   Future<void> _togglePlay() async {
@@ -81,6 +82,27 @@ class _SurahAudioScreenState extends ConsumerState<SurahAudioScreen> {
         title: const Text('استماع القرآن'),
         backgroundColor: AppColors.navy,
         elevation: 0,
+        actions: [
+          GestureDetector(
+            onTap: () => _showReciterPicker(context),
+            child: Container(
+              margin: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+              decoration: BoxDecoration(
+                color: Colors.white12,
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Icon(Icons.person, color: Colors.white70, size: 16),
+                  const SizedBox(width: 4),
+                  Text(_reciterName(), style: const TextStyle(color: Colors.white70, fontFamily: 'Amiri', fontSize: 13)),
+                ],
+              ),
+            ),
+          ),
+        ],
       ),
       body: Column(
         children: [
@@ -205,5 +227,46 @@ class _SurahAudioScreenState extends ConsumerState<SurahAudioScreen> {
     final m = (d.inMinutes % 60).toString().padLeft(2, '0');
     final s = (d.inSeconds % 60).toString().padLeft(2, '0');
     return d.inHours > 0 ? '$h:$m:$s' : '$m:$s';
+  }
+
+  String _reciterName() =>
+      QuranAudio.reciters.entries.firstWhere((e) => e.value.code == _reciterCode).key;
+
+  void _showReciterPicker(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (ctx) => Container(
+        padding: const EdgeInsets.all(AppDimensions.lg),
+        decoration: const BoxDecoration(
+          color: AppColors.navy,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(AppDimensions.radiusXl)),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(width: 40, height: 4, decoration: BoxDecoration(color: Colors.white30, borderRadius: BorderRadius.circular(2))),
+            const SizedBox(height: 16),
+            const Text('اختر القارئ', style: TextStyle(color: AppColors.gold, fontFamily: 'Amiri', fontSize: 20, fontWeight: FontWeight.bold)),
+            const Divider(color: AppColors.goldMuted, height: 32),
+            ...QuranAudio.reciters.entries.map((e) {
+              final selected = e.value.code == _reciterCode;
+              return ListTile(
+                leading: Icon(selected ? Icons.radio_button_checked : Icons.radio_button_unchecked, color: AppColors.gold),
+                title: Text(e.key, style: TextStyle(color: Colors.white, fontFamily: 'Amiri', fontSize: 18, fontWeight: selected ? FontWeight.bold : FontWeight.normal)),
+                trailing: selected ? const Icon(Icons.check, color: AppColors.gold) : null,
+                onTap: () {
+                  setState(() => _reciterCode = e.value.code);
+                  Navigator.pop(ctx);
+                  if (_currentSurah != null) {
+                    _playSurah(_currentSurah!);
+                  }
+                },
+              );
+            }),
+          ],
+        ),
+      ),
+    );
   }
 }

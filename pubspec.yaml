@@ -88,6 +88,8 @@ flutter:
     - assets/mushaf/
     - assets/tafsir/
     - assets/companions/
+    - assets/adhkar/
+    - assets/fiqh/
 
 fonts:
     - family: Amiri

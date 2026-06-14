@@ -261,7 +261,7 @@ class _GlobalSearchScreenState extends ConsumerState<GlobalSearchScreen> {
       case 'dua':
         route = '/dua'; extras = null; break;
       case 'azkar':
-        route = '/azkar'; extras = null; break;
+        route = '/adhkar'; extras = null; break;
       case 'book':
         route = '/book-reader/${data?['id'] ?? 1}'; extras = null; break;
       case 'name':
