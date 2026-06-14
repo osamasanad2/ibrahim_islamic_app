@@ -1,26 +1,26 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'theme_provider.dart';
+part of 'font_size_provider.dart';
 
 // **************************************************************************
 // RiverpodGenerator
 // **************************************************************************
 
-String _$themeModeNotifierHash() => r'75d172784259ed1226b2b813bd755832852ba5cc';
+String _$fontScaleNotifierHash() => r'2bd41f13428234422a384f9c1bd33f90649b9c1b';
 
-/// See also [ThemeModeNotifier].
-@ProviderFor(ThemeModeNotifier)
-final themeModeNotifierProvider =
-    AutoDisposeNotifierProvider<ThemeModeNotifier, ThemeMode>.internal(
-  ThemeModeNotifier.new,
-  name: r'themeModeNotifierProvider',
+/// See also [FontScaleNotifier].
+@ProviderFor(FontScaleNotifier)
+final fontScaleNotifierProvider =
+    AutoDisposeNotifierProvider<FontScaleNotifier, double>.internal(
+  FontScaleNotifier.new,
+  name: r'fontScaleNotifierProvider',
   debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
       ? null
-      : _$themeModeNotifierHash,
+      : _$fontScaleNotifierHash,
   dependencies: null,
   allTransitiveDependencies: null,
 );
 
-typedef _$ThemeModeNotifier = AutoDisposeNotifier<ThemeMode>;
+typedef _$FontScaleNotifier = AutoDisposeNotifier<double>;
 // ignore_for_file: type=lint
 // ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member

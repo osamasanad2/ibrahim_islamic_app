@@ -51,6 +51,16 @@ class LocalStorage {
     return box.get(key, defaultValue: defaultValue) as bool;
   }
 
+  Future<void> saveDouble(String key, double value) async {
+    final box = Hive.box(_settingsBox);
+    await box.put(key, value);
+  }
+
+  double getDouble(String key, {double defaultValue = 0.0}) {
+    final box = Hive.box(_settingsBox);
+    return box.get(key, defaultValue: defaultValue) as double;
+  }
+
   // ── Quran progress ────────────────────────────────────────
   Future<void> saveQuranPage(int page) async {
     final box = Hive.box(_progressBox);

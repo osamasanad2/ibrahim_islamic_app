@@ -77,29 +77,211 @@ class _TajweedReaderScreenState extends ConsumerState<TajweedReaderScreen> {
     );
   }
 
+  // Tajweed color constants
+  static const _maddColor = Color(0xFFE53935);
+  static const _ghunnahColor = Color(0xFF4CAF50);
+  static const _ikhfaColor = Color(0xFF9C27B0);
+  static const _iqlabColor = Color(0xFF008080);
+  static const _idghamNoGhunnahColor = Color(0xFFFFEB3B);
+  static const _qalqalahColor = Color(0xFF1E88E5);
+  static const _tafkhimColor = Color(0xFFFF8F00);
+
+  // Letter sets for tajweed rules
+  static const _ikhfaLetters = 'تثجدذزسشصضطظفققك';
+  static const _qalqalahLetters = 'قطبجد';
+  static const _idghamWithGhunnahLetters = 'ينمو';
+  static const _idghamWithoutGhunnahLetters = 'رل';
+  static const _heavyLetters = 'خصضطظغق';
+
+  bool _isCombiningMark(String c) {
+    final code = c.codeUnitAt(0);
+    return (code >= 0x064B && code <= 0x0652) ||
+        code == 0x0653 ||
+        code == 0x0670 ||
+        code == 0x06DF ||
+        code == 0x06E1 ||
+        code == 0x06ED;
+  }
+
+  int? _nextRealLetterIndex(String text, int start) {
+    for (int i = start; i < text.length; i++) {
+      if (!_isCombiningMark(text[i]) && text[i] != ' ') return i;
+    }
+    return null;
+  }
+
+  bool _hasSukunAfter(String text, int index) {
+    for (int i = 1; i <= 3 && index + i < text.length; i++) {
+      final ch = text[index + i];
+      if (ch == 'ْ' || ch == '۟' || ch == 'ۡ') return true;
+      if (!_isCombiningMark(ch)) break;
+    }
+    return false;
+  }
+
+  bool _hasTanweenAfter(String text, int index) {
+    for (int i = 1; i <= 3 && index + i < text.length; i++) {
+      final ch = text[index + i];
+      if (ch == 'ً' || ch == 'ٍ' || ch == 'ٌ') return true;
+      if (!_isCombiningMark(ch)) break;
+    }
+    return false;
+  }
+
+  Color? _getNoonSakinahRuleColor(String nextLetter) {
+    if (_idghamWithGhunnahLetters.contains(nextLetter)) return _ghunnahColor;
+    if (_idghamWithoutGhunnahLetters.contains(nextLetter)) return _idghamNoGhunnahColor;
+    if (nextLetter == 'ب') return _iqlabColor;
+    if (_ikhfaLetters.contains(nextLetter)) return _ikhfaColor;
+    return null;
+  }
+
+  Color? _determineTanweenColor(String text, int tanweenIdx) {
+    final tanweenChar = text[tanweenIdx];
+    int searchStart = tanweenIdx + 1;
+    // Skip the seat alif for tanween fatha: letter + FATHATAN + (ا or ى)
+    if (tanweenChar == 'ً' && searchStart < text.length) {
+      int skip = searchStart;
+      while (skip < text.length && _isCombiningMark(text[skip])) {
+        skip++;
+      }
+      if (skip < text.length && (text[skip] == 'ا' || text[skip] == 'ى')) {
+        searchStart = skip + 1;
+      }
+    }
+    // Check for immediate iqlab marker after tanween
+    if (searchStart < text.length && text[searchStart] == 'ۢ') return _iqlabColor;
+    // Check for small low meem after tanween kasra
+    if (searchStart < text.length &&
+        (tanweenChar == 'ٍ' || tanweenChar == 'ٌ') &&
+        text[searchStart] == 'ۭ') {
+      searchStart++;
+    }
+    final int? nextLetterIdx = _nextRealLetterIndex(text, searchStart);
+    if (nextLetterIdx != null) {
+      final ruleColor = _getNoonSakinahRuleColor(text[nextLetterIdx]);
+      if (ruleColor != null) return ruleColor;
+    }
+    return null;
+  }
+
+  bool _isRaaHeavy(String text, int index) {
+    // Check vowel on the raa itself
+    for (int i = 1; i <= 3 && index + i < text.length; i++) {
+      final c = text[index + i];
+      if (c == 'َ' || c == 'ُ') return true;
+      if (c == 'ِ') return false;
+      if (!_isCombiningMark(c)) break;
+    }
+    // Raa with sukun: check preceding vowel
+    if (_hasSukunAfter(text, index)) {
+      for (int i = 1; i <= 4 && index - i >= 0; i++) {
+        final c = text[index - i];
+        if (c == 'َ' || c == 'ُ') return true;
+        if (c == 'ِ') {
+          // Preceded by kasra: check if the letter carrying it is heavy
+          for (int j = index - i - 1; j >= 0; j--) {
+            if (!_isCombiningMark(text[j]) && text[j] != ' ') {
+              if (_heavyLetters.contains(text[j])) return true;
+              break;
+            }
+          }
+          return false;
+        }
+        if (!_isCombiningMark(c) && c != ' ') break;
+      }
+    }
+    return false;
+  }
+
   Color? _getTajweedColor(String text, int index) {
     final char = text[index];
 
-    // Ikhfa (إخفاء) - noon saakinah followed by ikhfa letters
-    const ikhfaLetters = 'تثجدذزسشصضطظفققك';
-    if (char == 'ن' && index + 1 < text.length && ikhfaLetters.contains(text[index + 1])) {
-      return const Color(0xFF9C27B0);
+    // === UTHMANI SPECIAL MARKS ===
+    if (char == 'ۢ') return _iqlabColor;
+    if (char == 'ۥ' || char == 'ۦ') return _maddColor;
+    if (char == 'ۭ') {
+      if (index > 0 && 'ًٌٍ'.contains(text[index - 1])) {
+        return _determineTanweenColor(text, index - 1);
+      }
+      return _ikhfaColor;
     }
 
-    // Ghunnah (نّ or مّ with shaddah)
-    if (char == 'ن' && index + 1 < text.length && text[index + 1] == 'ّ') return const Color(0xFF4CAF50);
-    if (char == 'م' && index + 1 < text.length && text[index + 1] == 'ّ') return const Color(0xFF4CAF50);
-    if (char == 'ّ' && index > 0 && (text[index - 1] == 'ن' || text[index - 1] == 'م')) return const Color(0xFF4CAF50);
+    // === SHADDAH MARK ===
+    if (char == 'ّ') {
+      if (index > 0) {
+        final prev = text[index - 1];
+        if (prev == 'ن' || prev == 'م') return _ghunnahColor;
+        if (prev == 'ر' || prev == 'ل') return _idghamNoGhunnahColor;
+      }
+      return null;
+    }
 
-    // Madd letters
-    if (char == 'ا' || char == 'و' || char == 'ي') return const Color(0xFFE53935);
+    // === TANWEEN MARKS ===
+    if (char == 'ً' || char == 'ٍ' || char == 'ٌ') {
+      return _determineTanweenColor(text, index);
+    }
 
-    // Qalqalah letters with sukoon
-    if ('قطبجد'.contains(char)) return const Color(0xFF1E88E5);
+    // === SUKUN MARKS ===
+    if (char == 'ْ' || char == '۟' || char == 'ۡ') {
+      if (index > 0 && _qalqalahLetters.contains(text[index - 1])) {
+        return _qalqalahColor;
+      }
+      return null;
+    }
 
-    // Laam in "الله" (bold/magnified) - Tafkhim
-    if (char == 'ل' && index + 2 < text.length && text[index + 1] == 'ل' && text[index + 2] == 'ه') return const Color(0xFFFF8F00);
-    if (char == 'ه' && index >= 2 && text[index - 1] == 'ل' && text[index - 2] == 'ل') return const Color(0xFFFF8F00);
+    // === NOON/MEEM WITH SHADDAH (look ahead) ===
+    if ((char == 'ن' || char == 'م') &&
+        index + 1 < text.length &&
+        text[index + 1] == 'ّ') {
+      return _ghunnahColor;
+    }
+
+    // === NOON SAKINAH (explicit noon + sukun) ===
+    if (char == 'ن' && _hasSukunAfter(text, index)) {
+      final int? nextLetterIdx = _nextRealLetterIndex(text, index + 2);
+      if (nextLetterIdx != null) {
+        final ruleColor = _getNoonSakinahRuleColor(text[nextLetterIdx]);
+        if (ruleColor != null) return ruleColor;
+      }
+    }
+
+    // === LETTER WITH TANWEEN ===
+    if (_hasTanweenAfter(text, index)) {
+      final Color? tanweenColor = _determineTanweenColor(text, index + 1);
+      if (tanweenColor != null) return tanweenColor;
+    }
+
+    // === TANWEEN SEAT ALIF (ا after tanween fatha) ===
+    if (char == 'ا' && index > 0 && text[index - 1] == 'ً') {
+      final Color? seatColor = _determineTanweenColor(text, index - 1);
+      if (seatColor != null) return seatColor;
+    }
+
+    // === TAFKHIM: Lam in "الله" ===
+    if (char == 'ل' &&
+        index + 2 < text.length &&
+        text[index + 1] == 'ل' &&
+        text[index + 2] == 'ه') {
+      return _tafkhimColor;
+    }
+    if (char == 'ه' &&
+        index >= 2 &&
+        text[index - 1] == 'ل' &&
+        text[index - 2] == 'ل') {
+      return _tafkhimColor;
+    }
+
+    // === TAFKHIM: Heavy Raa ===
+    if (char == 'ر' && _isRaaHeavy(text, index)) return _tafkhimColor;
+
+    // === QALQALAH ===
+    if (_qalqalahLetters.contains(char) && _hasSukunAfter(text, index)) {
+      return _qalqalahColor;
+    }
+
+    // === MADD LETTERS (lowest priority) ===
+    if (char == 'ا' || char == 'و' || char == 'ي') return _maddColor;
 
     return null;
   }
@@ -216,27 +398,41 @@ class _TajweedLegend extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     const legends = [
-      (color: Color(0xFFE53935), label: 'مد', emoji: '🟥'),
-      (color: Color(0xFF4CAF50), label: 'غنة', emoji: '🟩'),
-      (color: Color(0xFF1E88E5), label: 'قلقلة', emoji: '🟦'),
-      (color: Color(0xFF9C27B0), label: 'إخفاء', emoji: '🟪'),
-      (color: Color(0xFFFF8F00), label: 'تفخيم', emoji: '🟧'),
+      (color: Color(0xFFE53935), label: 'مد'),
+      (color: Color(0xFF4CAF50), label: 'غنة/إدغام بغنة'),
+      (color: Color(0xFF9C27B0), label: 'إخفاء'),
+      (color: Color(0xFF008080), label: 'إقلاب'),
+      (color: Color(0xFFFFEB3B), label: 'إدغام بغير غنة'),
+      (color: Color(0xFF1E88E5), label: 'قلقلة'),
+      (color: Color(0xFFFF8F00), label: 'تفخيم'),
     ];
 
     return Container(
       margin: const EdgeInsets.only(bottom: AppDimensions.lg),
-      padding: const EdgeInsets.symmetric(horizontal: AppDimensions.md, vertical: AppDimensions.sm),
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppDimensions.md,
+        vertical: AppDimensions.sm,
+      ),
       decoration: BoxDecoration(
         color: AppColors.navyLight,
         borderRadius: BorderRadius.circular(AppDimensions.radiusMd),
         border: Border.all(color: AppColors.goldMuted),
       ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+      child: Wrap(
+        spacing: 10,
+        runSpacing: 6,
+        alignment: WrapAlignment.center,
         children: legends.map((l) => Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text(l.emoji, style: const TextStyle(fontSize: 12)),
+            Container(
+              width: 10,
+              height: 10,
+              decoration: BoxDecoration(
+                color: l.color,
+                shape: BoxShape.circle,
+              ),
+            ),
             const SizedBox(width: 4),
             Text(
               l.label,

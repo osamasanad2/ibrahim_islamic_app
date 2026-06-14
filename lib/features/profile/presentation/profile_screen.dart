@@ -6,6 +6,7 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_dimensions.dart';
 import '../../../core/theme/theme_provider.dart';
+import '../../../core/theme/font_size_provider.dart';
 import '../../../core/storage/local_storage.dart';
 
 class ProfileScreen extends ConsumerWidget {
@@ -14,6 +15,7 @@ class ProfileScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final themeMode = ref.watch(themeModeNotifierProvider);
+    final fontScale = ref.watch(fontScaleNotifierProvider);
     final storage = LocalStorage();
     final bookmarks = storage.getBookmarks();
     final quranPage = storage.getQuranPage();
@@ -34,7 +36,7 @@ class ProfileScreen extends ConsumerWidget {
             const SizedBox(height: AppDimensions.xl),
             _buildStatsRow(quranPage, bookmarks.length, spiritualLevel),
             const SizedBox(height: AppDimensions.xl),
-            _buildMenuSection(context, ref, themeMode),
+            _buildMenuSection(context, ref, themeMode, fontScale),
             const SizedBox(height: AppDimensions.xl),
             _buildFooter(),
           ],
@@ -109,7 +111,7 @@ class ProfileScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildMenuSection(BuildContext context, WidgetRef ref, ThemeMode themeMode) {
+  Widget _buildMenuSection(BuildContext context, WidgetRef ref, ThemeMode themeMode, double fontScale) {
     return Column(
       children: [
         _buildMenuItem(
@@ -125,6 +127,12 @@ class ProfileScreen extends ConsumerWidget {
             onChanged: (_) => ref.read(themeModeNotifierProvider.notifier).toggleTheme(),
             activeThumbColor: AppColors.gold,
           ),
+        ),
+        _buildMenuItem(
+          icon: Icons.text_fields,
+          title: 'حجم الخط',
+          subtitle: _fontSizeLabel(fontScale),
+          onTap: () => _showFontSizeSheet(context, ref, fontScale),
         ),
         _buildMenuItem(
           icon: Icons.bookmark,
@@ -172,6 +180,66 @@ class ProfileScreen extends ConsumerWidget {
         subtitle: subtitle != null ? Text(subtitle, style: const TextStyle(color: AppColors.textOnDarkMuted, fontFamily: 'Inter', fontSize: 12)) : null,
         trailing: trailing ?? const Icon(Icons.arrow_forward_ios, color: AppColors.gold, size: 16),
         onTap: onTap,
+      ),
+    );
+  }
+
+  String _fontSizeLabel(double scale) {
+    if (scale <= 0.9) return 'صغير';
+    if (scale <= 1.05) return 'متوسط';
+    if (scale <= 1.25) return 'كبير';
+    return 'كبير جداً';
+  }
+
+  void _showFontSizeSheet(BuildContext context, WidgetRef ref, double currentScale) {
+    final options = [
+      {'label': 'صغير', 'scale': 0.85},
+      {'label': 'متوسط', 'scale': 1.0},
+      {'label': 'كبير', 'scale': 1.15},
+      {'label': 'كبير جداً', 'scale': 1.3},
+    ];
+
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (ctx) => Container(
+        padding: const EdgeInsets.all(AppDimensions.lg),
+        decoration: const BoxDecoration(
+          color: AppColors.navy,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(AppDimensions.radiusXl)),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 40, height: 4,
+              decoration: BoxDecoration(
+                color: AppColors.gold.withValues(alpha: 0.3),
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+            const SizedBox(height: AppDimensions.lg),
+            const Text('حجم الخط', style: TextStyle(color: AppColors.gold, fontFamily: 'Amiri', fontSize: 22, fontWeight: FontWeight.w700)),
+            const Divider(color: AppColors.goldMuted),
+            ...options.map((opt) {
+              final scale = opt['scale'] as double;
+              final label = opt['label'] as String;
+              final isSelected = currentScale == scale;
+              return ListTile(
+                title: Text(label, style: TextStyle(
+                  color: AppColors.textOnDark,
+                  fontFamily: 'Amiri',
+                  fontSize: 16,
+                )),
+                trailing: isSelected ? const Icon(Icons.check, color: AppColors.gold) : null,
+                onTap: () {
+                  ref.read(fontScaleNotifierProvider.notifier).setFontScale(scale);
+                  Navigator.pop(ctx);
+                },
+              );
+            }),
+          ],
+        ),
       ),
     );
   }

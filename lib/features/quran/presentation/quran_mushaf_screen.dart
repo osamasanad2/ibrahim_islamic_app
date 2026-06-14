@@ -8,6 +8,8 @@ import '../../../core/constants/app_dimensions.dart';
 import '../../../core/services/recent_activity_service.dart';
 import '../../../core/utils/quran_audio.dart';
 import '../../../data/quran/quran_providers.dart';
+import '../../../data/quran/ayah_model.dart';
+import '../../../data/quran/surah_meta.dart';
 import '../../../core/storage/local_storage.dart';
 
 class QuranMushafScreen extends ConsumerStatefulWidget {
@@ -24,6 +26,7 @@ class _QuranMushafScreenState extends ConsumerState<QuranMushafScreen> {
   final _storage = LocalStorage();
   bool _showControls = true;
   bool _isNightMode = false;
+  bool _textMode = false;
   int _bookmarkedPage = 0;
   int _sessionResumePage = 1;
   List<Map<String, dynamic>>? _surahPages;
@@ -44,6 +47,7 @@ class _QuranMushafScreenState extends ConsumerState<QuranMushafScreen> {
     _sessionResumePage = _currentPage;
     _pageController = PageController(initialPage: _currentPage - 1);
     _isNightMode = _storage.getBool('mushaf_night_mode', defaultValue: false);
+    _textMode = _storage.getBool('mushaf_text_mode', defaultValue: false);
     _bookmarkedPage = _storage.getQuranBookmark();
     _loadSurahPages();
     _audioPlayer.playerStateStream.listen((state) {
@@ -72,6 +76,13 @@ class _QuranMushafScreenState extends ConsumerState<QuranMushafScreen> {
     setState(() {
       _isNightMode = !_isNightMode;
       _storage.saveBool('mushaf_night_mode', _isNightMode);
+    });
+  }
+
+  void _toggleTextMode() {
+    setState(() {
+      _textMode = !_textMode;
+      _storage.saveBool('mushaf_text_mode', _textMode);
     });
   }
 
@@ -211,6 +222,12 @@ class _QuranMushafScreenState extends ConsumerState<QuranMushafScreen> {
                 if (idx == 604) {
                   return _DuaKhatmPage(isNightMode: _isNightMode);
                 }
+                if (_textMode) {
+                  return _TextMushafPage(
+                    pageNumber: idx + 1,
+                    isNightMode: _isNightMode,
+                  );
+                }
                 return _MushafPage(
                   pageNumber: idx + 1,
                   isNightMode: _isNightMode,
@@ -305,6 +322,11 @@ class _QuranMushafScreenState extends ConsumerState<QuranMushafScreen> {
                     icon: Icon(_isNightMode ? Icons.light_mode : Icons.dark_mode, color: Colors.white, size: 22),
                     onPressed: _toggleNightMode,
                     tooltip: 'الوضع الليلي',
+                  ),
+                  IconButton(
+                    icon: Icon(_textMode ? Icons.image : Icons.text_snippet, color: Colors.white, size: 22),
+                    onPressed: _toggleTextMode,
+                    tooltip: _textMode ? 'وضع المصحف' : 'وضع القراءة',
                   ),
                   const Spacer(),
                   Container(
@@ -1060,6 +1082,265 @@ class _AsbabTab extends ConsumerWidget {
                 child: Text(text, textAlign: TextAlign.justify, textDirection: TextDirection.rtl,
                     style: const TextStyle(color: AppColors.textOnDark, fontFamily: 'Amiri', fontSize: 15, height: 1.6)),
               ),
+      ),
+    );
+  }
+}
+
+class _AyahRange {
+  final int surah;
+  final int ayahStart;
+  final int ayahEnd;
+  const _AyahRange({required this.surah, required this.ayahStart, required this.ayahEnd});
+}
+
+List<_AyahRange> _getAyahRangesForPage(int page, List<SurahMeta> surahs) {
+  final ranges = <_AyahRange>[];
+  for (int i = 0; i < surahs.length; i++) {
+    final surah = surahs[i];
+    final startPage = surah.startPage;
+    final endPage = i + 1 < surahs.length ? surahs[i + 1].startPage - 1 : 604;
+    if (endPage < startPage) continue;
+    if (page < startPage || page > endPage) continue;
+    final totalPages = endPage - startPage + 1;
+    final pageIndex = page - startPage;
+    final ayahStart = pageIndex == 0 ? 1 : (surah.ayahs * pageIndex / totalPages).floor() + 1;
+    final ayahEnd = pageIndex == totalPages - 1 ? surah.ayahs : (surah.ayahs * (pageIndex + 1) / totalPages).floor();
+    if (ayahStart <= ayahEnd) {
+      ranges.add(_AyahRange(surah: surah.number, ayahStart: ayahStart, ayahEnd: ayahEnd));
+    }
+  }
+  return ranges;
+}
+
+final textPageAyahsProvider = FutureProvider.family<List<AyahModel>, int>((ref, page) async {
+  final surahs = await ref.watch(surahListProvider.future);
+  final ranges = _getAyahRangesForPage(page, surahs);
+  if (ranges.isEmpty) return [];
+  final uniqueSurahs = ranges.map((r) => r.surah).toSet();
+  final surahAyahs = <int, List<AyahModel>>{};
+  for (final sn in uniqueSurahs) {
+    surahAyahs[sn] = await ref.watch(surahContentProvider(sn).future);
+  }
+  final result = <AyahModel>[];
+  for (final range in ranges) {
+    final ayahs = surahAyahs[range.surah]!;
+    for (final ayah in ayahs) {
+      if (ayah.numberInSurah >= range.ayahStart && ayah.numberInSurah <= range.ayahEnd) {
+        result.add(ayah);
+      }
+    }
+  }
+  result.sort((a, b) => a.numberInQuran.compareTo(b.numberInQuran));
+  return result;
+});
+
+class _TextMushafPage extends ConsumerWidget {
+  final int pageNumber;
+  final bool isNightMode;
+  const _TextMushafPage({required this.pageNumber, required this.isNightMode});
+
+  Color get _bgColor => isNightMode ? const Color(0xFF121212) : const Color(0xFFFDF7E7);
+  Color get _textColor => isNightMode ? Colors.white70 : const Color(0xFF3A2E1C);
+  Color get _accentColor => isNightMode ? AppColors.gold : const Color(0xFF8B7355);
+  Color get _cardBg => isNightMode ? Colors.white.withValues(alpha: 0.05) : const Color(0xFFF5F0E6);
+  Color get _dividerColor => isNightMode ? Colors.white12 : const Color(0xFFD4C5A9);
+
+  static const _surahNames = [
+    '', 'الفاتحة','البقرة','آل عمران','النساء','المائدة','الأنعام','الأعراف','الأنفال','التوبة','يونس',
+    'هود','يوسف','الرعد','إبراهيم','الحجر','النحل','الإسراء','الكهف','مريم','طه',
+    'الأنبياء','الحج','المؤمنون','النور','الفرقان','الشعراء','النمل','القصص','العنكبوت','الروم',
+    'لقمان','السجدة','الأحزاب','سبأ','فاطر','يس','الصافات','ص','الزمر','غافر',
+    'فصلت','الشورى','الزخرف','الدخان','الجاثية','الأحقاف','محمد','الفتح','الحجرات','ق',
+    'الذاريات','الطور','النجم','القمر','الرحمن','الواقعة','الحديد','المجادلة','الحشر','الممتحنة',
+    'الصف','الجمعة','المنافقون','التغابن','الطلاق','التحريم','الملك','القلم','الحاقة','المعارج',
+    'نوح','الجن','المزمل','المدثر','القيامة','الإنسان','المرسلات','النبأ','النازعات','عبس',
+    'التكوير','الانفطار','المطففين','الانشقاق','البروج','الطارق','الأعلى','الغاشية','الفجر','البلد',
+    'الشمس','الليل','الضحى','الشرح','التين','العلق','القدر','البينة','الزلزلة','العاديات',
+    'القارعة','التكاثر','العصر','الهمزة','الفيل','قريش','الماعون','الكوثر','الكافرون','النصر',
+    'المسد','الإخلاص','الفلق','الناس',
+  ];
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final ayahsAsync = ref.watch(textPageAyahsProvider(pageNumber));
+    return ayahsAsync.when(
+      loading: () => Container(
+        color: _bgColor,
+        child: const Center(child: CircularProgressIndicator(color: AppColors.gold)),
+      ),
+      error: (_, __) => Container(
+        color: _bgColor,
+        child: Center(
+          child: Text('تعذر تحميل الآيات', style: TextStyle(fontFamily: 'Amiri', fontSize: 16, color: _textColor)),
+        ),
+      ),
+      data: (ayahs) => _buildPage(context, ayahs),
+    );
+  }
+
+  Widget _buildPage(BuildContext context, List<AyahModel> ayahs) {
+    if (ayahs.isEmpty) {
+      return Container(
+        color: _bgColor,
+        child: Center(
+          child: Text('لا توجد آيات في هذه الصفحة', style: TextStyle(fontFamily: 'Amiri', fontSize: 16, color: _textColor)),
+        ),
+      );
+    }
+
+    return Container(
+      color: _bgColor,
+      child: InteractiveViewer(
+        minScale: 1.0,
+        maxScale: 3.0,
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 32),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: _buildAyahSections(ayahs),
+          ),
+        ),
+      ),
+    );
+  }
+
+  List<Widget> _buildAyahSections(List<AyahModel> ayahs) {
+    final widgets = <Widget>[];
+    int? currentSurah;
+
+    for (int i = 0; i < ayahs.length; i++) {
+      final ayah = ayahs[i];
+
+      if (ayah.surahNumber != currentSurah) {
+        currentSurah = ayah.surahNumber;
+        widgets.add(_buildSurahHeader(currentSurah));
+        if (currentSurah != 1 && currentSurah != 9 && ayah.numberInSurah == 1) {
+          widgets.add(_buildBasmalah());
+        }
+      }
+
+      widgets.add(_buildAyahCard(ayah));
+    }
+
+    return widgets;
+  }
+
+  Widget _buildSurahHeader(int surahNumber) {
+    final name = surahNumber >= 1 && surahNumber <= 114 ? _surahNames[surahNumber] : 'سورة $surahNumber';
+    return Padding(
+      padding: const EdgeInsets.only(top: 24, bottom: 16),
+      child: Center(
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 10),
+          decoration: BoxDecoration(
+            color: _cardBg,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: _dividerColor),
+          ),
+          child: Text(
+            'سورة $name',
+            textDirection: TextDirection.rtl,
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              color: _accentColor,
+              fontFamily: 'Amiri',
+              fontSize: 22,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildBasmalah() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8),
+      child: Center(
+        child: Text(
+          'بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ',
+          textDirection: TextDirection.rtl,
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            color: _accentColor,
+            fontFamily: 'Amiri',
+            fontSize: 22,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildAyahCard(AyahModel ayah) {
+    return Container(
+      margin: const EdgeInsets.symmetric(vertical: 6),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: _cardBg,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: _dividerColor),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            textDirection: TextDirection.rtl,
+            children: [
+              Container(
+                width: 32,
+                height: 32,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  border: Border.all(color: _accentColor),
+                ),
+                child: Center(
+                  child: Text(
+                    '${ayah.numberInSurah}',
+                    style: TextStyle(
+                      color: _accentColor,
+                      fontFamily: 'Amiri',
+                      fontSize: 13,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  ayah.text,
+                  textDirection: TextDirection.rtl,
+                  textAlign: TextAlign.justify,
+                  style: TextStyle(
+                    color: _textColor,
+                    fontFamily: 'Amiri',
+                    fontSize: 22,
+                    height: 1.8,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          if (ayah.translation != null && ayah.translation!.isNotEmpty) ...[
+            const SizedBox(height: 8),
+            Text(
+              ayah.translation!,
+              textDirection: TextDirection.ltr,
+              textAlign: TextAlign.left,
+              style: TextStyle(
+                color: _textColor.withValues(alpha: 0.7),
+                fontFamily: 'Amiri',
+                fontSize: 14,
+                fontStyle: FontStyle.italic,
+                height: 1.4,
+              ),
+            ),
+          ],
+        ],
       ),
     );
   }
