@@ -5,8 +5,8 @@
   <p><strong>تطبيق إسلامي شامل للمسلم العصري</strong></p>
   <p><strong>A comprehensive Islamic lifestyle application built with Flutter</strong></p>
   <br>
-  <p>أوقات الصلاة · القرآن · الأذكار · المساعد الذكي · خريطة المساجد · رحلة روحية · والمزيد</p>
-  <p>Prayer times · Quran · Azkar · AI Assistant · Mosque Map · Spiritual Journey · and more</p>
+  <p>أوقات الصلاة · القرآن · الأذكار · المساعد الذكي · خريطة المساجد · المكتبة الإسلامية · رحلة روحية · والمزيد</p>
+  <p>Prayer times · Quran · Azkar · AI Assistant · Mosque Map · Islamic Books · Spiritual Journey · and more</p>
 </div>
 
 ---
@@ -17,65 +17,78 @@
 
 | English | العربية |
 |---------|---------|
-| **Prayer Times** — Accurate calculation using Adhan library with auto location detection. Track prayer status (on time / late / missed / qada). | **أوقات الصلاة** — حساب دقيق لأوقات الصلاة باستخدام مكتبة Adhan مع تحديد الموقع تلقائياً. تتبع حالة الصلاة (في الوقت / متأخر / فائت / قضاء). |
+| **Prayer Times** — Accurate calculation using Adhan library with auto location detection and city selection. Track prayer status (on time / late / missed / qada). | **أوقات الصلاة** — حساب دقيق لأوقات الصلاة باستخدام مكتبة Adhan مع تحديد الموقع تلقائياً واختيار المدينة. تتبع حالة الصلاة (في الوقت / متأخر / فائت / قضاء). |
 | **Qibla Direction** — Real-time compass-based direction finder with GPS calculation. | **اتجاه القبلة** — بوصلة رقمية دقيقة للقبلة مع حساب الموقع عبر GPS. |
-| **Tasbeeh** — Digital counter with preset dhikr (SubhanAllah, Alhamdulillah, Allahu Akbar). | **التسبيح** — عداد إلكتروني للأذكار (سبحان الله، الحمد لله، الله أكبر) مع عداد مخصص. |
-| **Azkar** — Morning and evening adhkar with Arabic, transliteration, and translation. | **الأذكار** — أذكار الصباح والمساء مع النص العربي والترجمة. |
+| **Tasbeeh** — Digital counter with preset dhikr (SubhanAllah, Alhamdulillah, Allahu Akbar) and custom counter. | **التسبيح** — عداد إلكتروني للأذكار (سبحان الله، الحمد لله، الله أكبر) مع عداد مخصص. |
+| **Azkar** — Morning, evening, and occasion-based adhkar with Arabic, transliteration, and translation. | **الأذكار** — أذكار الصباح والمساء والمناسبات مع النص العربي والترجمة. |
+| **Dua Engine** — Mood-based dua recommendations from comprehensive JSON collection. | **محرك الأدعية** — أدعية مخصصة حسب حالتك المزاجية من مجموعة شاملة. |
 
 ### 📖 القرآن الكريم — Quran
 
 | English | العربية |
 |---------|---------|
 | **Surah List** — All 114 surahs with revelation type, verse count, and search. | **قائمة السور** — جميع سور القرآن الـ 114 مع نوع النزول وعدد الآيات وإمكانية البحث. |
-| **Surah Reader** — Ayah-by-ayah reader with Arabic, translation, audio, and bookmarks. | **مصحف القراءة** — قراءة آية بآية مع النص العربي والترجمة والصوت والعلامات المرجعية. |
-| **Mushaf Mode** — Page-based viewing with page images, jump-to-page, and tafsir sheets. | **وضع المصحف** — عرض على شكل صفحات مع صور الصفحات والتنقل السريع والتفسير. |
-| **Audio Player** — Full surah playback with controls and per-ayah audio. | **مشغل الصوت** — استماع كامل للسور مع عناصر التحكم وتشغيل كل آية على حدة. |
-| **Khatma Planner** — Plan Quran completion with daily page targets. | **مخطط الختمة** — خطط لختم القرآن مع أهداف يومية لعدد الصفحات. |
+| **Surah Reader** — Ayah-by-ayah reader with Arabic, translation, audio playback, and bookmarks. | **مصحف القراءة** — قراءة آية بآية مع النص العربي والترجمة والصوت والعلامات المرجعية. |
+| **Mushaf Mode** — Page-based viewing with 604 scanned page images, jump-to-page, and tafsir sheets. | **وضع المصحف** — عرض على شكل صفحات مع 604 صورة للصفحات والتنقل السريع والتفسير. |
+| **Audio Player** — Full surah playback with controls and per-ayah audio selection. | **مشغل الصوت** — استماع كامل للسور مع عناصر التحكم وتشغيل كل آية على حدة. |
+| **Tajweed Reader** — Color-coded Quran reading with tajweed rules for proper recitation. | **مصحف التجويد** — قراءة القرآن مع تلوين أحكام التجويد. |
+| **Quran Search** — Full-text search across the entire Quran. | **البحث في القرآن** — بحث نصي كامل في جميع آيات القرآن. |
+| **Khatma Planner** — Plan Quran completion with daily page targets and progress tracking. | **مخطط الختمة** — خطط لختم القرآن مع أهداف يومية لعدد الصفحات وتتبع التقدم. |
+| **Tafsir & Asbab al-Nuzul** — Verse-by-verse explanation from alquran.cloud API and reasons of revelation from local JSON. | **التفسير وأسباب النزول** — تفسير الآيات وأسباب النزول من API ومصادر محلية. |
+| **Bookmarks** — Save verses with cross-device sync via Firebase Firestore. | **العلامات المرجعية** — حفظ الآيات مع مزامنتها عبر الأجهزة باستخدام Firebase. |
 
 ### 🤖 المساعد الذكي — AI Assistant
 
 | English | العربية |
 |---------|---------|
-| **Gemini Chat** — Ask Islamic questions powered by Google Gemini AI. | **محادثة ذكية** — اطرح أسئلتك الإسلامية على الذكاء الاصطناعي Gemini. |
-| **Suggestions** — Quick prompts for common topics. | **اقتراحات** — أسئلة مقترحة حول مواضيع إسلامية متنوعة. |
-| **API Key Config** — Set your Gemini key in-app, saved securely. | **إعداد المفتاح** — أدخل مفتاح API الخاص بك من داخل التطبيق. |
+| **Multi-Provider Chat** — Ask Islamic questions powered by Google Gemini, OpenRouter, or Together AI. | **محادثة متعددة المزودين** — اطرح أسئلتك الإسلامية على Gemini أو OpenRouter أو Together AI. |
+| **Suggestions** — Quick prompts for common Islamic topics. | **اقتراحات** — أسئلة مقترحة حول مواضيع إسلامية متنوعة. |
+| **API Key Config** — Set your API key in-app, saved securely. | **إعداد المفتاح** — أدخل مفتاح API الخاص بك من داخل التطبيق. |
+| **Chat History** — Persistent conversation history across sessions. | **سجل المحادثات** — حفظ تاريخ المحادثات عبر الجلسات. |
 
 ### 📿 الأذكار والأدعية — Dhikr & Du'a
 
 | English | العربية |
 |---------|---------|
-| **99 Names of Allah** — All names with Arabic, transliteration, and meaning. | **أسماء الله الحسنى** — جميع الأسماء الـ 99 مع النص العربي والترجمة والمعنى. |
-| **Dua Engine** — Mood-based dua recommendations. | **محرك الأدعية** — أدعية مخصصة حسب حالتك المزاجية. |
-| **Sadaqah Tracker** — Log charity by type with totals. | **متتبع الصدقة** — سجل صدقاتك حسب النوع مع إجمالي التبرعات. |
-| **Wird / Daily Routine** — 6 daily tasks with progress tracking. | **الورد اليومي** — 6 مهام روحية يومية مع متابعة التقدم. |
+| **99 Names of Allah** — All 99 names with Arabic, transliteration, and meaning. | **أسماء الله الحسنى** — جميع الأسماء الـ 99 مع النص العربي والترجمة والمعنى. |
+| **Sadaqah Tracker** — Log charity by type with running totals. | **متتبع الصدقة** — سجل صدقاتك حسب النوع مع إجمالي التبرعات. |
+| **Wird / Daily Routine** — 6 daily spiritual tasks with progress tracking. | **الورد اليومي** — 6 مهام روحية يومية مع متابعة التقدم. |
+| **Ruqyah** — Verses and supplications for spiritual healing and protection. | **الرقية** — آيات وأدعية للرقية الشرعية والتحصين. |
+| **Audio Recording** — Record and save personal duas and memos. | **تسجيل صوتي** — سجل أدعية وملاحظات صوتية شخصية. |
 
 ### 🗺️ المجتمع والموقع — Community & Location
 
 | English | العربية |
 |---------|---------|
 | **Mosque Map** — Google Maps with dark theme showing nearby mosques. | **خريطة المساجد** — خرائط Google بوضع داكن لعرض المساجد القريبة. |
-| **Family Hub** — Family stats, challenges, and member levels. | **مركز العائلة** — إحصائيات عائلية وتحديات جماعية ومستويات الأعضاء. |
-| **Spiritual Journey** — 6-level progression system. | **الرحلة الروحية** — نظام تطور من 6 مستويات مع متطلبات ومكافآت. |
+| **Family Hub** — Family stats, challenges, and member levels with shared progress. | **مركز العائلة** — إحصائيات عائلية وتحديات جماعية ومستويات الأعضاء. |
+| **Spiritual Journey** — 6-level progression system with requirements and rewards. | **الرحلة الروحية** — نظام تطور من 6 مستويات مع متطلبات ومكافآت. |
+| **Social & Challenges** — Achievements, Quranic competitions, and community engagement. | **التحديات الاجتماعية** — إنجازات ومسابقات قرآنية وتفاعل مجتمعي. |
 
 ### 📚 العلوم الإسلامية — Knowledge
 
 | English | العربية |
 |---------|---------|
 | **Hadith Collection** — 40 Nawawi hadiths with Arabic and translation. | **مجموعة الأحاديث** — 40 حديثاً نووياً مع النص العربي والترجمة. |
+| **Islamic Books Library** — 200+ books covering various Islamic sciences with in-app reader. | **المكتبة الإسلامية** — أكثر من 200 كتاب في شتى العلوم الإسلامية مع قارئ مدمج. |
+| **Seerah** — Prophetic biography from multiple sources including Ar-Raheeq Al-Makhtum. | **السيرة النبوية** — سيرة النبي من مصادر متعددة منها الرحيق المختوم. |
+| **Companions** — Biographies of sahaba and notable Muslims throughout history. | **الصحابة** — تراجم الصحابة وشخصيات إسلامية بارزة. |
+| **Fiqh al-Ibadat** — Comprehensive guide to worship jurisprudence (purity, prayer, fasting, zakat, hajj). | **الفقه** — دليل فقه العبادات (الطهارة، الصلاة، الصوم، الزكاة، الحج). |
 | **Hajj & Umrah Guide** — Step-by-step guide for all pilgrimage stages. | **دليل الحج والعمرة** — دليل تفصيلي خطوة بخطوة لجميع مناسك الحج. |
-| **Islamic Calendar** — Hijri calendar with events and holidays. | **التقويم الهجري** — تقويم إسلامي مع الأحداث والمناسبات الدينية. |
+| **Islamic Calendar** — Hijri calendar with religious events and holidays. | **التقويم الهجري** — تقويم إسلامي مع الأحداث والمناسبات الدينية. |
 | **Zakat Calculator** — Calculate zakat on cash, gold, silver with nisab check. | **حاسبة الزكاة** — حساب زكاتك على النقد والذهب والفضة مع التحقق من النصاب. |
-| **Tafsir** — Verse-by-verse explanation from alquran.cloud API. | **التفسير** — تفسير الآيات مستورد من API alquran.cloud. |
+| **Women's Section** — Fiqh rulings and duas specific to Muslim women. | **قسم النساء** — أحكام وأدعية خاصة بالمرأة المسلمة. |
 
 ### ⚙️ التخصيص — Personalization
 
 | English | العربية |
 |---------|---------|
-| **Onboarding** — 4-step welcome flow, persisted in storage. | **شاشة الترحيب** — 4 خطوات تعريفية بالميزات الرئيسية. |
-| **Profile** — Stats, dark/light theme toggle, bookmarks, about. | **الملف الشخصي** — إحصائيات وتبديل السمة الداكنة/الفاتحة والعلامات المرجعية. |
-| **Prayer Notifications** — Automatic alerts for prayer times. | **إشعارات الصلاة** — تنبيهات تلقائية لأوقات الصلاة. |
+| **Onboarding** — 4-step welcome flow, persisted in local storage. | **شاشة الترحيب** — 4 خطوات تعريفية بالميزات الرئيسية. |
+| **Profile & Settings** — Stats, dark/light theme toggle, font size control, bookmarks. | **الملف الشخصي** — إحصائيات وتبديل السمة الداكنة/الفاتحة والتحكم بحجم الخط والعلامات المرجعية. |
+| **Prayer Notifications** — Automatic alerts for prayer times with configurable settings. | **إشعارات الصلاة** — تنبيهات تلقائية لأوقات الصلاة مع إعدادات قابلة للتخصيص. |
+| **Explore** — Centralized content browser with search and filter chips across all features. | **استكشف** — متصفح محتوى مركزي قابل للبحث مع مرشحات لجميع الميزات. |
+| **Global Search** — Cross-feature search across Quran, hadith, books, and more. | **بحث شامل** — بحث عبر جميع الميزات بما في ذلك القرآن والحديث والكتب. |
 | **Bookmark Sync** — Cross-device sync via Firebase Firestore. | **مزامنة العلامات** — مزامنة العلامات المرجعية عبر الأجهزة باستخدام Firebase. |
-| **Explore** — Searchable content browser with filter chips. | **استكشف** — متصفح محتوى قابل للبحث مع مرشحات. |
 
 ---
 
@@ -93,18 +106,27 @@
 |----------------------|---------------------|
 | **Flutter 3.x** | إطار عمل التطبيق — Cross-platform framework |
 | **Dart** | لغة البرمجة — Programming language |
-| **flutter_riverpod** | إدارة الحالة — State management |
-| **go_router** | التنقل بين الشاشات — Declarative routing |
-| **Dio** | طلبات الشبكة — HTTP client |
-| **Hive** | التخزين المحلي — Local storage |
-| **Firebase** | مزامنة البيانات — Cloud sync |
+| **flutter_riverpod** | إدارة الحالة — State management (with code generation) |
+| **go_router** | التنقل بين الشاشات — Declarative routing (41 routes) |
+| **Dio** | طلبات الشبكة — HTTP client with interceptors |
+| **Hive + SharedPreferences** | التخزين المحلي — Local NoSQL database + key-value storage |
+| **Firebase** | Cloud services — Firestore, Auth, Messaging, Remote Config |
 | **just_audio** | تشغيل الصوت — Audio playback |
 | **google_maps_flutter** | خرائط المساجد — Mosque map |
-| **flutter_compass** | بوصلة القبلة — Qibla compass |
+| **flutter_compass + geolocator** | بوصلة القبلة والموقع — Qibla compass & GPS location |
 | **Adhan** | حساب أوقات الصلاة — Prayer time calculation |
 | **flutter_local_notifications** | إشعارات الصلاة — Prayer notifications |
-| **Gemini API** | المساعد الذكي — AI assistant |
+| **Gemini / OpenRouter / Together AI** | المساعد الذكي — Multi-provider AI assistant |
 | **alquran.cloud API** | بيانات التفسير — Tafsir data |
+| **lottie + shimmer** | الرسوم المتحركة والتحميل — Animations & loading placeholders |
+| **flutter_svg + cached_network_image** | عرض الصور — SVG & cached network images |
+| **percent_indicator** | مؤشرات التقدم — Progress indicators |
+| **flutter_tts** | تحويل النص إلى كلام — Text-to-speech for azkar |
+| **record** | التسجيل الصوتي — Audio recording |
+| **share_plus + url_launcher** | المشاركة والروابط — Sharing & URL launching |
+| **intl + timezone** | التوطين والمناطق الزمنية — Internationalization & timezone |
+| **riverpod_generator + build_runner** | توليد الكود — Code generation |
+| **hive_generator** | توليد متكيفات Hive — Hive adapter generation |
 
 ---
 
@@ -147,34 +169,50 @@ flutter run
 ```
 lib/
 ├── core/
+│   ├── ai/                 # مزودات AI (Gemini, OpenRouter, Together)
 │   ├── constants/          # الألوان والأبعاد والسلاسل والخطوط
 │   ├── di/                 # مزودات حقن التبعيات
 │   ├── network/            # عميل API مع المعترضات
-│   ├── router/             # إعدادات GoRouter (24 مساراً)
+│   ├── router/             # إعدادات GoRouter (41 مساراً)
+│   ├── services/           # خدمات (Firebase, chat history, remote config)
 │   ├── storage/            # غلاف تخزين Hive المحلي
-│   ├── theme/              # السمات الداكنة/الفاتحة
-│   ├── utils/              # خدمات الصوت والموقع وحساب الصلاة
+│   ├── theme/              # السمات الداكنة/الفاتحة وحجم الخط
+│   ├── utils/              # خدمات الموقع والصوت والتقويم والإشعارات
 │   └── widgets/            # الويدجت المشتركة (الشريط السفلي)
-├── features/
+├── data/
+│   └── quran/              # نماذج وبيانات القرآن والسور
+├── features/               # 32 وحدة ميزات
+│   ├── adhkar/             # أذكار الصباح والمساء والمناسبات
 │   ├── ai_assistant/       # شاشة المحادثة الذكية
-│   ├── azkar/              # شاشات الأذكار والتسبيح
+│   ├── azkar/              # شاشات التسبيح
+│   ├── books/              # المكتبة الإسلامية وقارئ الكتب
 │   ├── calendar/           # التقويم الهجري
+│   ├── companions/         # تراجم الصحابة
 │   ├── dua/                # محرك الأدعية
 │   ├── explore/            # متصفح المحتوى
 │   ├── family_hub/         # مركز العائلة
-│   ├── hadith/             # مجموعة الأحاديث
+│   ├── fiqh/               # فقه العبادات
+│   ├── hadith/             # مجموعة الأحاديث النووية
 │   ├── hajj/               # دليل الحج والعمرة
-│   ├── home/               # اللوحة الرئيسية
+│   ├── home/               # اللوحة الرئيسية (7 ويدجتات)
 │   ├── mosque_map/         # خريطة المساجد
 │   ├── names_of_allah/     # أسماء الله الحسنى
+│   ├── notification_settings/ # إعدادات الإشعارات
 │   ├── onboarding/         # شاشة الترحيب
 │   ├── prayer_times/       # أوقات الصلاة
-│   ├── profile/            # الملف الشخصي
+│   ├── profile/            # الملف الشخصي والإعدادات
 │   ├── qibla/              # اتجاه القبلة
-│   ├── quran/              # القارئ والمصحف والصوت والختمة
+│   ├── quran/              # القارئ والمصحف والصوت والتجويد والبحث والختمة
+│   ├── recording/          # التسجيل الصوتي
+│   ├── ruqyah/             # الرقية الشرعية
 │   ├── sadaqah/            # متتبع الصدقة
+│   ├── search/             # البحث الشامل
+│   ├── seerah/             # السيرة النبوية
+│   ├── social/             # التحديات والإنجازات
 │   ├── spiritual_journey/  # الرحلة الروحية
+│   ├── tajweed/            # مصحف التجويد الملون
 │   ├── wird/               # الورد اليومي
+│   ├── womens_section/     # قسم النساء
 │   └── zakat/              # حاسبة الزكاة
 └── main.dart               # نقطة الدخول
 ```
@@ -198,9 +236,10 @@ lib/
 
 | البيان — Metric | القيمة — Value |
 |-----------------|----------------|
-| شاشات وويدجت — Screens & widgets | **40+** |
-| مسارات التوجيه — GoRouter routes | **24** |
-| سطور الكود — Lines of Dart code | **13,000+** |
+| وحدات الميزات — Feature modules | **32** |
+| مسارات التوجيه — GoRouter routes | **41** |
+| ملفات Dart — Dart files | **102** |
+| سطور الكود — Lines of Dart code | **21,800+** |
 | أخطاء التحليل — Analyzer errors | **0** |
 | تحذيرات التحليل — Analyzer warnings | **0** |
 

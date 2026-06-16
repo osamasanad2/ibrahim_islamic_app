@@ -1,3 +1,4 @@
 {
-    "liveServer.settings.port": 5502
+    "liveServer.settings.port": 5502,
+    "cmake.sourceDirectory": "/home/sam/Documents/programming_projects/IbrahimAPP/ibrahim_islamic_app/linux"
 }

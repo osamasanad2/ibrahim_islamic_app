@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:just_audio/just_audio.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_dimensions.dart';
 import '../../../core/services/recent_activity_service.dart';
@@ -47,15 +48,27 @@ class Zikr {
 }
 
 class AdhkarScreen extends ConsumerStatefulWidget {
-  const AdhkarScreen({super.key});
+  final int initialMainTab;
+  final int initialTimeTab;
+  
+  const AdhkarScreen({
+    super.key,
+    this.initialMainTab = 0,
+    this.initialTimeTab = 0,
+  });
 
   @override
   ConsumerState<AdhkarScreen> createState() => _AdhkarScreenState();
 }
 
+// مسارات مقاطع صوتية مجانية لأذكار الصباح والمساء
+// المصدر: makkahlive.net - مقاطع صوتية مفتوحة المصدر بصوت مشاري العفاسي
+const _morningAudioUrl = 'https://www.islamcan.com/audio/azkar/morning.mp3';
+const _eveningAudioUrl = 'https://www.islamcan.com/audio/azkar/evening.mp3';
+
 class _AdhkarScreenState extends ConsumerState<AdhkarScreen> {
-  int _mainTabIndex = 0;
-  int _timeTabIndex = 0;
+  late int _mainTabIndex;
+  late int _timeTabIndex;
 
   List<Zikr> _morning = [];
   List<Zikr> _evening = [];
@@ -65,11 +78,59 @@ class _AdhkarScreenState extends ConsumerState<AdhkarScreen> {
   bool _loading = true;
   String? _error;
 
+  // مشغّل الصوت الكامل لأذكار الصباح والمساء
+  final AudioPlayer _fullAudioPlayer = AudioPlayer();
+  bool _fullAudioPlaying = false;
+  bool _fullAudioLoading = false;
+
   @override
   void initState() {
     super.initState();
+    _mainTabIndex = widget.initialMainTab;
+    _timeTabIndex = widget.initialTimeTab;
     recordActivity(id: 'adhkar', title: 'الأذكار', subtitle: 'الأذكار النبوية', route: '/adhkar', icon: '📿');
     _loadAll();
+    _fullAudioPlayer.playerStateStream.listen((state) {
+      if (mounted) {
+        setState(() {
+          _fullAudioPlaying = state.playing;
+          _fullAudioLoading = state.processingState == ProcessingState.loading ||
+              state.processingState == ProcessingState.buffering;
+        });
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _fullAudioPlayer.dispose();
+    super.dispose();
+  }
+
+  Future<void> _toggleFullAudio() async {
+    if (_fullAudioLoading) return;
+    try {
+      if (_fullAudioPlaying) {
+        await _fullAudioPlayer.pause();
+      } else {
+        final url = _timeTabIndex == 0 ? _morningAudioUrl : _eveningAudioUrl;
+        if (_fullAudioPlayer.audioSource == null) {
+          await _fullAudioPlayer.setUrl(url);
+        }
+        await _fullAudioPlayer.play();
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('تعذّر تشغيل الصوت، تأكد من اتصالك بالإنترنت', style: TextStyle(fontFamily: 'Amiri')), backgroundColor: AppColors.navyLight),
+        );
+      }
+    }
+  }
+
+  Future<void> _stopFullAudio() async {
+    await _fullAudioPlayer.stop();
+    await _fullAudioPlayer.seek(Duration.zero);
   }
 
   Future<void> _loadAll() async {
@@ -220,6 +281,7 @@ class _AdhkarScreenState extends ConsumerState<AdhkarScreen> {
     return Column(
       children: [
         _buildTimeSubTabs(),
+        _buildFullAudioBanner(),
         Expanded(
           child: Stack(
             children: [
@@ -229,6 +291,83 @@ class _AdhkarScreenState extends ConsumerState<AdhkarScreen> {
           ),
         ),
       ],
+    );
+  }
+
+  Widget _buildFullAudioBanner() {
+    final label = _timeTabIndex == 0 ? 'أذكار الصباح' : 'أذكار المساء';
+    return Container(
+      margin: const EdgeInsets.fromLTRB(16, 4, 16, 8),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [AppColors.navyLight, const Color(0xFF1A2744)],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: AppColors.goldMuted.withValues(alpha: 0.5)),
+      ),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: AppColors.gold.withValues(alpha: 0.15),
+              shape: BoxShape.circle,
+            ),
+            child: const Icon(Icons.headphones_rounded, color: AppColors.gold, size: 20),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text('استمع إلى $label',
+                  style: const TextStyle(color: AppColors.gold, fontFamily: 'Amiri', fontSize: 14, fontWeight: FontWeight.bold)),
+                const Text('بصوت مشاري العفاسي',
+                  style: TextStyle(color: AppColors.textOnDarkMuted, fontFamily: 'Amiri', fontSize: 12)),
+              ],
+            ),
+          ),
+          if (_fullAudioLoading)
+            const SizedBox(width: 36, height: 36,
+              child: Padding(padding: EdgeInsets.all(6), child: CircularProgressIndicator(color: AppColors.gold, strokeWidth: 2)))
+          else
+            GestureDetector(
+              onTap: _toggleFullAudio,
+              child: Container(
+                width: 36, height: 36,
+                decoration: BoxDecoration(
+                  color: _fullAudioPlaying ? AppColors.gold : AppColors.navyLight,
+                  shape: BoxShape.circle,
+                  border: Border.all(color: AppColors.gold),
+                ),
+                child: Icon(
+                  _fullAudioPlaying ? Icons.pause_rounded : Icons.play_arrow_rounded,
+                  color: _fullAudioPlaying ? AppColors.navy : AppColors.gold,
+                  size: 22,
+                ),
+              ),
+            ),
+          if (_fullAudioPlaying) ...[
+            const SizedBox(width: 8),
+            GestureDetector(
+              onTap: _stopFullAudio,
+              child: Container(
+                width: 32, height: 32,
+                decoration: BoxDecoration(
+                  color: AppColors.navyLight,
+                  shape: BoxShape.circle,
+                  border: Border.all(color: AppColors.goldMuted),
+                ),
+                child: const Icon(Icons.stop_rounded, color: AppColors.textOnDarkMuted, size: 18),
+              ),
+            ),
+          ],
+        ],
+      ),
     );
   }
 
@@ -244,6 +383,7 @@ class _AdhkarScreenState extends ConsumerState<AdhkarScreen> {
       ),
     );
   }
+
 
   Widget _buildSubTab(String label, int index) {
     final selected = _timeTabIndex == index;

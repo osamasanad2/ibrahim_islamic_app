@@ -20,14 +20,29 @@ class ThemeModeNotifier extends _$ThemeModeNotifier {
     }
   }
 
-  void toggleTheme() {
+  void setThemeMode(ThemeMode mode) {
     final storage = LocalStorage();
-    if (state == ThemeMode.dark) {
-      state = ThemeMode.light;
-      storage.saveString('theme_mode', 'light');
-    } else {
-      state = ThemeMode.dark;
-      storage.saveString('theme_mode', 'dark');
+    state = mode;
+    String value;
+    switch (mode) {
+      case ThemeMode.light:
+        value = 'light';
+      case ThemeMode.system:
+        value = 'system';
+      default:
+        value = 'dark';
+    }
+    storage.saveString('theme_mode', value);
+  }
+
+  void toggleTheme() {
+    switch (state) {
+      case ThemeMode.dark:
+        setThemeMode(ThemeMode.light);
+      case ThemeMode.light:
+        setThemeMode(ThemeMode.system);
+      case ThemeMode.system:
+        setThemeMode(ThemeMode.dark);
     }
   }
 }

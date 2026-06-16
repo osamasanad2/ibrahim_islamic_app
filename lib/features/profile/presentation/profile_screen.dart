@@ -122,11 +122,8 @@ class ProfileScreen extends ConsumerWidget {
         _buildMenuItem(
           icon: Icons.dark_mode,
           title: 'المظهر',
-          trailing: Switch(
-            value: themeMode == ThemeMode.dark,
-            onChanged: (_) => ref.read(themeModeNotifierProvider.notifier).toggleTheme(),
-            activeThumbColor: AppColors.gold,
-          ),
+          subtitle: _themeModeLabel(themeMode),
+          onTap: () => ref.read(themeModeNotifierProvider.notifier).toggleTheme(),
         ),
         _buildMenuItem(
           icon: Icons.text_fields,
@@ -182,6 +179,17 @@ class ProfileScreen extends ConsumerWidget {
         onTap: onTap,
       ),
     );
+  }
+
+  String _themeModeLabel(ThemeMode mode) {
+    switch (mode) {
+      case ThemeMode.light:
+        return 'نهاري';
+      case ThemeMode.system:
+        return 'تلقائي';
+      case ThemeMode.dark:
+        return 'ليلي';
+    }
   }
 
   String _fontSizeLabel(double scale) {

@@ -10,6 +10,7 @@ class QuickActionsGrid extends StatelessWidget {
   Widget build(BuildContext context) {
     const actions = <_QuickAction>[
       _QuickAction(icon: Icons.menu_book, label: 'المصحف', route: '/mushaf', color: Color(0xFF4CAF50)),
+      _QuickAction(icon: Icons.history_edu, label: 'الأحاديث', route: '/hadith', color: Color(0xFFFF9800)),
       _QuickAction(icon: Icons.access_time, label: 'مواقيت الصلاة', route: '/prayer-times', color: Color(0xFF2196F3)),
       _QuickAction(icon: Icons.explore, label: 'اتجاه القبلة', route: '/qibla', color: Color(0xFF4CAF50)),
       _QuickAction(icon: Icons.mosque, label: 'مساجد قريبة', route: '/mosque-map', color: Color(0xFF009688)),
@@ -19,7 +20,6 @@ class QuickActionsGrid extends StatelessWidget {
       _QuickAction(icon: Icons.bookmark_border, label: 'الأذكار المنوعة', route: '/occasions-adhkar', color: Color(0xFF9C27B0)),
       _QuickAction(icon: Icons.headphones, label: 'صوت القرآن', route: '/surah-audio', color: Color(0xFF4CAF50)),
       _QuickAction(icon: Icons.search, label: 'بحث في القرآن', route: '/quran-search', color: Color(0xFF2196F3)),
-      _QuickAction(icon: Icons.history_edu, label: 'الأحاديث', route: '/hadith', color: Color(0xFFFF9800)),
       _QuickAction(icon: Icons.bookmark, label: 'العلامات', route: '/bookmarks', color: Color(0xFF00BCD4)),
       _QuickAction(icon: Icons.library_books, label: 'المكتبة', route: '/books', color: Color(0xFFE91E63)),
       _QuickAction(icon: Icons.timeline, label: 'السيرة النبوية', route: '/seerah', color: Color(0xFF2196F3)),

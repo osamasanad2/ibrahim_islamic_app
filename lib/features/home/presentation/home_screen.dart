@@ -231,48 +231,48 @@ class HomeScreen extends ConsumerWidget {
 
   Widget _buildHeader(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.fromLTRB(AppDimensions.lg, AppDimensions.sm, AppDimensions.lg, AppDimensions.xs),
+      margin: const EdgeInsets.fromLTRB(AppDimensions.lg, AppDimensions.lg, AppDimensions.lg, AppDimensions.sm),
+      padding: const EdgeInsets.symmetric(horizontal: AppDimensions.md, vertical: AppDimensions.sm),
+      decoration: BoxDecoration(
+        color: const Color(0xFF0A111E), // Darker than standard Navy
+        borderRadius: BorderRadius.circular(AppDimensions.radiusLg),
+        border: Border.all(color: AppColors.goldMuted.withValues(alpha: 0.4), width: 1),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.3),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
       child: Row(
         children: [
           ClipRRect(
             borderRadius: BorderRadius.circular(AppDimensions.radiusSm),
-            child: Image.asset('assets/images/app_icon.png', height: 32, width: 32),
+            child: Image.asset('assets/images/app_icon.png', height: 36, width: 36),
           ),
-          const SizedBox(width: 8),
+          const SizedBox(width: 12),
           const Column(
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text('إبراهيم',
-                style: TextStyle(color: AppColors.gold, fontFamily: 'Amiri', fontSize: 18, fontWeight: FontWeight.w700, height: 1.2)),
+                style: TextStyle(color: AppColors.gold, fontFamily: 'Amiri', fontSize: 20, fontWeight: FontWeight.bold, height: 1.2)),
               Text('رفيقك الديني',
-                style: TextStyle(color: AppColors.goldLight, fontFamily: 'Inter', fontSize: 10, fontWeight: FontWeight.w600, height: 1.2)),
+                style: TextStyle(color: AppColors.goldLight, fontFamily: 'Inter', fontSize: 11, fontWeight: FontWeight.w600, height: 1.2)),
             ],
           ),
           const Spacer(),
           GestureDetector(
-            onTap: () => context.push('/surah-audio'),
-            child: Container(
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: AppColors.navyLight,
-                borderRadius: BorderRadius.circular(AppDimensions.radiusMd),
-                border: Border.all(color: AppColors.goldMuted.withValues(alpha: 0.3)),
-              ),
-              child: const Icon(Icons.headphones, color: AppColors.gold, size: 18),
-            ),
-          ),
-          const SizedBox(width: AppDimensions.xs),
-          GestureDetector(
             onTap: () => context.push('/global-search'),
             child: Container(
-              padding: const EdgeInsets.all(8),
+              padding: const EdgeInsets.all(10),
               decoration: BoxDecoration(
-                color: AppColors.navyLight,
+                color: AppColors.navyLight.withValues(alpha: 0.5),
                 borderRadius: BorderRadius.circular(AppDimensions.radiusMd),
                 border: Border.all(color: AppColors.goldMuted.withValues(alpha: 0.3)),
               ),
-              child: const Icon(Icons.search, color: AppColors.gold, size: 18),
+              child: const Icon(Icons.search, color: AppColors.gold, size: 20),
             ),
           ),
         ],

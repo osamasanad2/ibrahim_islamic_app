@@ -25,6 +25,10 @@ class _TasbeehScreenState extends State<TasbeehScreen>
     {'text': 'الله أكبر', 'target': 34},
     {'text': 'لا إله إلا الله', 'target': 100},
     {'text': 'استغفر الله', 'target': 100},
+    {'text': 'اللهم صل على محمد', 'target': 100},
+    {'text': 'لا حول ولا قوة إلا بالله', 'target': 100},
+    {'text': 'حسبي الله ونعم الوكيل', 'target': 100},
+    {'text': 'سبحان الله وبحمده', 'target': 100},
   ];
   int _presetIndex = 0;
 

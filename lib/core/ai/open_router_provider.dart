@@ -12,19 +12,20 @@ class OpenRouterProvider extends AIProvider {
   @override
   String get displayName => 'OpenRouter (النماذج المفتوحة)';
   @override
-  String get defaultModel => 'qwen/qwen-2.5-72b-instruct';
+  String get defaultModel => 'qwen/qwen-2.5-72b-instruct:free';
   @override
   String get apiKeyLabel => 'مفتاح OpenRouter API';
   @override
   bool get needsApiKey => true;
   @override
   List<String> get availableModels => [
-    'qwen/qwen-2.5-72b-instruct',
-    'qwen/qwen-2.5-32b-instruct',
-    'meta-llama/llama-3.1-70b-instruct',
-    'meta-llama/llama-3.1-8b-instruct',
-    'mistralai/mistral-7b-instruct',
-    'deepseek/deepseek-r1',
+    'google/gemini-2.0-flash-exp:free',
+    'google/gemini-2.0-flash-lite-preview-02-05:free',
+    'meta-llama/llama-3.1-8b-instruct:free',
+    'meta-llama/llama-3.3-70b-instruct:free',
+    'qwen/qwen-2.5-72b-instruct:free',
+    'mistralai/mistral-7b-instruct:free',
+    'deepseek/deepseek-r1:free',
   ];
 
   @override

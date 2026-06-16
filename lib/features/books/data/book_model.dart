@@ -53,6 +53,12 @@ class BookRepository {
   List<Map<String, dynamic>>? _booksMeta;
   Map<int, BookContent>? _contents;
 
+  static const Map<int, String> _separateContentFiles = {
+    6: 'assets/books/tafsir_ibn_kathir.json',
+    7: 'assets/books/tafsir_tabari.json',
+    23: 'assets/books/tafsir_saadi.json',
+  };
+
   Future<List<Map<String, dynamic>>> loadBooksMeta() async {
     if (_booksMeta != null) return _booksMeta!;
     final json = await rootBundle.loadString('assets/books/islamic_books.json');
@@ -79,6 +85,15 @@ class BookRepository {
   }
 
   Future<BookContent?> loadContent(int bookId) async {
+    final separateFile = _separateContentFiles[bookId];
+    if (separateFile != null) {
+      try {
+        final json = await rootBundle.loadString(separateFile);
+        return BookContent.fromJson(jsonDecode(json) as Map<String, dynamic>);
+      } catch (_) {
+        return null;
+      }
+    }
     final all = await loadAllContent();
     return all[bookId];
   }
