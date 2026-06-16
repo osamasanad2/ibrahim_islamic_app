@@ -1,4 +1,5 @@
-import '../../features/hadith/data/hadith_search_index.dart';
+import 'dart:convert';
+import 'package:flutter/services.dart';
 
 class DailyHadith {
   final int id;
@@ -56,7 +57,13 @@ class DailyHadithSelector {
   }
 
   static Future<void> _load() async {
-    final all = await HadithSearchIndex().getAll();
-    _hadiths = all.map((e) => DailyHadith.fromJson(e)).toList();
+    try {
+      final str = await rootBundle.loadString('assets/hadith/hadith_40.json');
+      final data = json.decode(str) as Map<String, dynamic>;
+      final list = data['hadiths'] as List;
+      _hadiths = list.map((e) => DailyHadith.fromJson(e as Map<String, dynamic>)).toList();
+    } catch (_) {
+      _hadiths = [];
+    }
   }
 }
