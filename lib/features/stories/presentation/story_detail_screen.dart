@@ -197,6 +197,26 @@ class _StoryDetailScreenState extends State<StoryDetailScreen> {
               height: 1.8,
             ),
           ),
+          if (section.source != null) ...[
+            const SizedBox(height: AppDimensions.xs),
+            Row(
+              children: [
+                Icon(Icons.auto_stories, size: 14, color: AppColors.gold.withValues(alpha: 0.6)),
+                const SizedBox(width: 6),
+                Expanded(
+                  child: Text(
+                    section.source!,
+                    style: TextStyle(
+                      color: AppColors.gold.withValues(alpha: 0.7),
+                      fontFamily: 'Amiri',
+                      fontSize: 12,
+                      fontStyle: FontStyle.italic,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ],
         ],
       ),
     );

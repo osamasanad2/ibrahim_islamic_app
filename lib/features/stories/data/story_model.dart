@@ -56,12 +56,14 @@ class StoryInfo {
 class StorySection {
   final String title;
   final String text;
+  final String? source;
 
-  const StorySection({required this.title, required this.text});
+  const StorySection({required this.title, required this.text, this.source});
 
   factory StorySection.fromJson(Map<String, dynamic> json) => StorySection(
         title: json['title'] as String? ?? '',
         text: json['text'] as String? ?? '',
+        source: json['source'] as String?,
       );
 }
 
