@@ -13,6 +13,7 @@ class QuickActionsGrid extends StatelessWidget {
     final actions = <_QuickAction>[
       _QuickAction(icon: Icons.menu_book, label: l.quickMushaf, route: '/mushaf', color: const Color(0xFF4CAF50)),
       _QuickAction(icon: Icons.history_edu, label: l.quickHadith, route: '/hadith', color: const Color(0xFFFF9800)),
+      _QuickAction(icon: Icons.history_edu, label: l.quickStories, route: '/stories', color: const Color(0xFFE53935)),
       _QuickAction(icon: Icons.access_time, label: l.quickPrayerTimes, route: '/prayer-times', color: const Color(0xFF2196F3)),
       _QuickAction(icon: Icons.explore, label: l.quickQibla, route: '/qibla', color: const Color(0xFF4CAF50)),
       _QuickAction(icon: Icons.mosque, label: l.quickMosqueMap, route: '/mosque-map', color: const Color(0xFF009688)),
@@ -34,7 +35,6 @@ class QuickActionsGrid extends StatelessWidget {
       _QuickAction(icon: Icons.people_outline, label: l.quickSocial, route: '/social', color: const Color(0xFF00BCD4)),
       _QuickAction(icon: Icons.fingerprint, label: l.quickNamesOfAllah, route: '/names', color: const Color(0xFF009688)),
       _QuickAction(icon: Icons.auto_stories, label: l.quickAsbabNuzul, route: '/asbab-book', color: const Color(0xFFFF9800)),
-      _QuickAction(icon: Icons.history_edu, label: l.quickStories, route: '/stories', color: const Color(0xFFE53935)),
     ];
 
     return Column(
