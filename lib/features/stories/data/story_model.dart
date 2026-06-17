@@ -20,6 +20,7 @@ const storyCategories = [
   StoryCategory(id: 'prophets', name: 'قصص الأنبياء', icon: Icons.mosque, color: Color(0xFF4CAF50)),
   StoryCategory(id: 'companions', name: 'الصحابة', icon: Icons.people, color: Color(0xFF2196F3)),
   StoryCategory(id: 'scholars', name: 'أعلام وعلماء', icon: Icons.school, color: Color(0xFF9C27B0)),
+  StoryCategory(id: 'bani_israel', name: 'بنو إسرائيل', icon: Icons.star, color: Color(0xFF00BCD4)),
   StoryCategory(id: 'quranic', name: 'قصص قرآنية', icon: Icons.menu_book, color: Color(0xFFFF9800)),
 ];
 
