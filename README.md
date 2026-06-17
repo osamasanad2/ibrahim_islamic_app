@@ -41,7 +41,8 @@
 
 | English | العربية |
 |---------|---------|
-| **Multi-Provider Chat** — Ask Islamic questions powered by Google Gemini, OpenRouter, or Together AI. | **محادثة متعددة المزودين** — اطرح أسئلتك الإسلامية على Gemini أو OpenRouter أو Together AI. |
+| **Multi-Provider Chat** — Ask Islamic questions powered by Google Gemini, OpenRouter, Together AI, or OpenAI. | **محادثة متعددة المزودين** — اطرح أسئلتك الإسلامية على Gemini أو OpenRouter أو Together AI أو OpenAI. |
+| **Local Free Mode** — Use a simple built-in reply mode without an API key. | **الوضع المحلي المجاني** — استخدم ردودًا مبسطة مدمجة بدون مفتاح API. |
 | **Suggestions** — Quick prompts for common Islamic topics. | **اقتراحات** — أسئلة مقترحة حول مواضيع إسلامية متنوعة. |
 | **API Key Config** — Set your API key in-app, saved securely. | **إعداد المفتاح** — أدخل مفتاح API الخاص بك من داخل التطبيق. |
 | **Chat History** — Persistent conversation history across sessions. | **سجل المحادثات** — حفظ تاريخ المحادثات عبر الجلسات. |
@@ -87,6 +88,15 @@
 | **Profile & Settings** — Stats, dark/light theme toggle, font size control, bookmarks. | **الملف الشخصي** — إحصائيات وتبديل السمة الداكنة/الفاتحة والتحكم بحجم الخط والعلامات المرجعية. |
 | **Prayer Notifications** — Automatic alerts for prayer times with configurable settings. | **إشعارات الصلاة** — تنبيهات تلقائية لأوقات الصلاة مع إعدادات قابلة للتخصيص. |
 | **Explore** — Centralized content browser with search and filter chips across all features. | **استكشف** — متصفح محتوى مركزي قابل للبحث مع مرشحات لجميع الميزات. |
+
+### 🔧 إعداد المساعد الذكي — AI Assistant Setup
+
+| English | العربية |
+|---------|---------|
+| **Free Local Mode** — Works without any API key by using a built-in reply mode. | **الوضع المحلي المجاني** — يعمل بدون أي مفتاح API باستخدام ردود مدمجة بسيطة. |
+| **OpenAI Support** — Paste your OpenAI API key in-app, then choose OpenAI as the provider. | **دعم OpenAI** — الصق مفتاح OpenAI داخل التطبيق ثم اختر OpenAI كمزود. |
+| **Simple Setup** — No complex configuration required; choose provider and key once. | **إعداد بسيط** — لا حاجة لإعدادات معقدة، اختر المزود والمفتاح مرة واحدة فقط. |
+| **Quick Test** — Use the built-in connection tester to verify your API key before chat. | **اختبار سريع** — استخدم الاختبار المدمج للتحقق من مفتاح API قبل المحادثة. |
 | **Global Search** — Cross-feature search across Quran, hadith, books, and more. | **بحث شامل** — بحث عبر جميع الميزات بما في ذلك القرآن والحديث والكتب. |
 | **Bookmark Sync** — Cross-device sync via Firebase Firestore. | **مزامنة العلامات** — مزامنة العلامات المرجعية عبر الأجهزة باستخدام Firebase. |
 

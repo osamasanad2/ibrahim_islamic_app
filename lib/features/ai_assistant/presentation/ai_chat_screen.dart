@@ -151,12 +151,13 @@ class _AiChatScreenState extends ConsumerState<AiChatScreen> {
 
     try {
       final apiKey = ref.read(effectiveApiKeyProvider);
+      final providerId = ref.read(selectedAiProviderId);
+      final providerNeedsKey = ref.read(currentAiProvider).needsApiKey;
 
-      if (apiKey.isEmpty) {
+      if (providerNeedsKey && apiKey.isEmpty) {
         throw Exception('المفتاح فارغ');
       }
 
-      final providerId = ref.read(selectedAiProviderId);
       final model = ref.read(selectedAiModel);
       final resolvedModel = model.isNotEmpty ? model : ref.read(currentAiProvider).defaultModel;
 
@@ -344,6 +345,10 @@ class _AiChatScreenState extends ConsumerState<AiChatScreen> {
                           }
                           if (tempProvider == 'together') {
                             final r = await tester.testTogether(apiKey: apiCtrl.text);
+                            results.add({'label': r.label, 'success': r.success, 'msg': r.message, 'code': r.statusCode});
+                          }
+                          if (tempProvider == 'openai') {
+                            final r = await tester.testOpenAI(apiKey: apiCtrl.text);
                             results.add({'label': r.label, 'success': r.success, 'msg': r.message, 'code': r.statusCode});
                           }
                         }
@@ -678,7 +683,8 @@ class _AiChatScreenState extends ConsumerState<AiChatScreen> {
   }
 
   Widget _buildInput() {
-    final hasKey = ref.read(effectiveApiKeyProvider).isNotEmpty;
+    final provider = ref.read(currentAiProvider);
+    final hasKey = !provider.needsApiKey || ref.read(effectiveApiKeyProvider).isNotEmpty;
 
     return Container(
       padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),

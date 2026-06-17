@@ -19,6 +19,7 @@ const storyCategories = [
   StoryCategory(id: 'battles', name: 'معارك وفتوحات', icon: Icons.shield, color: Color(0xFFE53935)),
   StoryCategory(id: 'prophets', name: 'قصص الأنبياء', icon: Icons.mosque, color: Color(0xFF4CAF50)),
   StoryCategory(id: 'companions', name: 'الصحابة', icon: Icons.people, color: Color(0xFF2196F3)),
+  StoryCategory(id: 'scholars', name: 'أعلام وعلماء', icon: Icons.school, color: Color(0xFF9C27B0)),
   StoryCategory(id: 'quranic', name: 'قصص قرآنية', icon: Icons.menu_book, color: Color(0xFFFF9800)),
 ];
 

@@ -132,6 +132,47 @@ class ConnectivityTestService {
     }
   }
 
+  Future<ConnectionTestResult> testOpenAI({required String apiKey}) async {
+    final start = DateTime.now();
+    try {
+      final response = await dio.post(
+        'https://api.openai.com/v1/chat/completions',
+        options: Options(
+          headers: {
+            'Authorization': 'Bearer $apiKey',
+            'Content-Type': 'application/json',
+          },
+          sendTimeout: const Duration(seconds: 10),
+          receiveTimeout: const Duration(seconds: 10),
+        ),
+        data: {
+          'model': 'gpt-3.5-turbo',
+          'messages': [
+            {'role': 'user', 'content': 'قل "مرحباً" بالعربية'}
+          ],
+          'max_tokens': 50,
+        },
+      );
+      final elapsed = DateTime.now().difference(start);
+      return ConnectionTestResult(
+        label: '🤖 OpenAI',
+        success: true,
+        statusCode: response.statusCode,
+        message: 'النموذج يعمل',
+        duration: elapsed,
+      );
+    } catch (e) {
+      final elapsed = DateTime.now().difference(start);
+      return ConnectionTestResult(
+        label: '🤖 OpenAI',
+        success: false,
+        statusCode: e is DioException ? e.response?.statusCode : null,
+        message: _simplify(e.toString()),
+        duration: elapsed,
+      );
+    }
+  }
+
   Future<ConnectionTestResult> testTogether({required String apiKey}) async {
     final start = DateTime.now();
     try {
