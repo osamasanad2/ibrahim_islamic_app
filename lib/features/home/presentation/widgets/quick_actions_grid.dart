@@ -15,6 +15,7 @@ class QuickActionsGrid extends StatelessWidget {
       _QuickAction(icon: Icons.menu_book, label: l.quickMushaf, route: '/mushaf', color: const Color(0xFF4CAF50)),
       _QuickAction(icon: Icons.headphones, label: l.quickQuranAudio, route: '/surah-audio', color: const Color(0xFF4CAF50)),
       _QuickAction(icon: Icons.palette, label: l.quickTajweed, route: '/tajweed-reader', color: const Color(0xFFE91E63)),
+      _QuickAction(icon: Icons.self_improvement, label: 'اذكر الله', route: '/dhikr-reminders', color: const Color(0xFFFF9800)),
       _QuickAction(icon: Icons.healing, label: l.quickRuqyah, route: '/ruqyah', color: const Color(0xFF795548)),
       _QuickAction(icon: Icons.search, label: l.quickQuranSearch, route: '/quran-search', color: const Color(0xFF2196F3)),
       _QuickAction(icon: Icons.bookmark, label: l.quickBookmarks, route: '/bookmarks', color: const Color(0xFF00BCD4)),

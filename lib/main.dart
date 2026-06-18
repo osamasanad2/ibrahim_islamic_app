@@ -1,9 +1,11 @@
 import 'dart:io';
+import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:audio_service/audio_service.dart' as audio_svc;
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'app.dart';
 import 'core/ai/remote_config_service.dart';
 import 'core/network/api_client.dart';
@@ -11,14 +13,55 @@ import 'core/storage/local_storage.dart';
 import 'core/utils/notification_service.dart';
 import 'core/utils/audio_handler.dart';
 import 'core/services/locale_provider.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'core/services/error_reporting_service.dart';
+import 'core/constants/app_colors.dart';
 
-void main() async {
+Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await dotenv.load(fileName: '.env');
 
+  FlutterError.onError = (details) {
+    FlutterError.presentError(details);
+    ErrorReportingService.instance.recordError(
+      details.exception,
+      details.stack,
+      reason: details.summary.toString(),
+    );
+  };
+
+  ui.PlatformDispatcher.instance.onError = (error, stack) {
+    ErrorReportingService.instance.recordError(error, stack, fatal: true);
+    return true;
+  };
+
+  ErrorWidget.builder = (details) {
+    ErrorReportingService.instance.recordError(
+      details.exception,
+      details.stack,
+      reason: 'Flutter ErrorWidget',
+    );
+    return const Material(
+      color: AppColors.navy,
+      child: Center(
+        child: Padding(
+          padding: EdgeInsets.all(24),
+          child: Text(
+            'عذراً، حدث خطأ غير متوقع',
+            style: TextStyle(color: AppColors.error, fontSize: 16),
+            textAlign: TextAlign.center,
+          ),
+        ),
+      ),
+    );
+  };
+
   if (Platform.isAndroid || Platform.isIOS) {
-    await Firebase.initializeApp();
+    try {
+      await Firebase.initializeApp();
+      ErrorReportingService.instance.init();
+    } catch (e, stack) {
+      ErrorReportingService.instance.recordError(e, stack, reason: 'Firebase.initializeApp failed');
+    }
     await RemoteConfigService.init();
   }
 
