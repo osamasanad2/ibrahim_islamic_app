@@ -12,6 +12,8 @@ class QuranAudio {
     'ماهر المعيقلي': ReciterInfo(code: 'maher', baseUrl: 'https://server12.mp3quran.net/maher'),
     'ياسر الدوسري': ReciterInfo(code: 'yasser', baseUrl: 'https://server11.mp3quran.net/yasser'),
     'محمد اللحيدان': ReciterInfo(code: 'lhdan', baseUrl: 'https://server8.mp3quran.net/lhdan'),
+    'محمود الحصري': ReciterInfo(code: 'husr', baseUrl: 'https://server13.mp3quran.net/husr'),
+    'إسلام صبحي': ReciterInfo(code: 'islam', baseUrl: 'https://server14.mp3quran.net/islam/Rewayat-Hafs-A-n-Assem'),
   };
 
   static String getSurahUrl(int surahNumber, {String reciterCode = 'afs'}) {

@@ -1537,6 +1537,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get reciterLuhaidan => 'Muhammad Al-Luhaidan';
 
   @override
+  String get reciterHusary => 'Mahmoud Al-Husary';
+
+  @override
+  String get reciterIslamSobhi => 'Islam Sobhi';
+
+  @override
   String get notifPrayerTimes => 'Prayer Times';
 
   @override

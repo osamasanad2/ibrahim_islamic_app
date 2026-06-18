@@ -1522,6 +1522,12 @@ class AppLocalizationsAr extends AppLocalizations {
   String get reciterLuhaidan => 'محمد اللحيدان';
 
   @override
+  String get reciterHusary => 'محمود الحصري';
+
+  @override
+  String get reciterIslamSobhi => 'إسلام صبحي';
+
+  @override
   String get notifPrayerTimes => 'أوقات الصلاة';
 
   @override

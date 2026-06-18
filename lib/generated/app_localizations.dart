@@ -3100,6 +3100,18 @@ abstract class AppLocalizations {
   /// **'Muhammad Al-Luhaidan'**
   String get reciterLuhaidan;
 
+  /// No description provided for @reciterHusary.
+  ///
+  /// In en, this message translates to:
+  /// **'Mahmoud Al-Husary'**
+  String get reciterHusary;
+
+  /// No description provided for @reciterIslamSobhi.
+  ///
+  /// In en, this message translates to:
+  /// **'Islam Sobhi'**
+  String get reciterIslamSobhi;
+
   /// No description provided for @notifPrayerTimes.
   ///
   /// In en, this message translates to:

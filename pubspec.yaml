@@ -43,8 +43,8 @@ dependencies:
   cloud_firestore: ^4.17.4
   firebase_messaging: ^14.9.4
   firebase_remote_config: ^4.3.18
-  firebase_crashlytics: ^3.5.7
-  firebase_analytics: ^10.10.7
+  # firebase_crashlytics: ^3.5.7     # يتطلب google-services.json حقيقي
+  # firebase_analytics: ^10.10.7     # يتطلب google-services.json حقيقي
 
   # UI & UX
   lottie: ^3.1.0                   # Animations
