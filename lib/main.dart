@@ -88,12 +88,14 @@ Future<void> main() async {
     NotificationService().scheduleAll();
     unawaited(audio_svc.AudioService.init(
       builder: () => QuranAudioHandler(),
-      config: const audio_svc.AudioServiceConfig(
+      config: audio_svc.AudioServiceConfig(
         androidNotificationChannelId: 'com.ibrahim.islamic.ibrahim.audio',
         androidNotificationChannelName: 'مشغل القرآن',
-        androidNotificationOngoing: false,
-        androidStopForegroundOnPause: true,
+        androidNotificationChannelDescription: 'التحكم في تشغيل القرآن الكريم من شاشة القفل والإشعارات',
+        androidNotificationOngoing: true,
+        androidStopForegroundOnPause: false,
         androidNotificationClickStartsActivity: true,
+        androidNotificationIcon: 'mipmap/launcher_icon',
       ),
     ));
   }

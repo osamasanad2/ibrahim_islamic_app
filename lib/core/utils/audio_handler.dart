@@ -1,7 +1,25 @@
+import 'dart:io';
 import 'package:audio_service/audio_service.dart';
+import 'package:flutter/services.dart';
 import 'package:just_audio/just_audio.dart';
+import 'package:path_provider/path_provider.dart';
 import 'audio_focus.dart';
 import 'quran_audio.dart';
+
+const String _appIconPath = 'assets/images/app_icon.png';
+String? _cachedIconPath;
+
+Future<String> _getAppIconUri() async {
+  if (_cachedIconPath != null) return _cachedIconPath!;
+  final dir = await getTemporaryDirectory();
+  final file = File('${dir.path}/app_icon.png');
+  if (!file.existsSync()) {
+    final data = await rootBundle.load(_appIconPath);
+    await file.writeAsBytes(data.buffer.asUint8List());
+  }
+  _cachedIconPath = file.uri.toString();
+  return _cachedIconPath!;
+}
 
 class QuranAudioHandler extends BaseAudioHandler {
   static QuranAudioHandler? instance;
@@ -107,10 +125,12 @@ class QuranAudioHandler extends BaseAudioHandler {
     _surahName = nameStr ?? '';
     _reciterName = reciter ?? '';
 
+    final iconUri = await _getAppIconUri();
     mediaItem.add(MediaItem(
       id: url,
       title: _surahName,
       artist: _reciterName,
+      artUri: Uri.parse(iconUri),
     ));
 
     await player.setAudioSource(AudioSource.uri(Uri.parse(url)));
