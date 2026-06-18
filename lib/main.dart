@@ -56,7 +56,17 @@ Future<void> main() async {
     );
   };
 
-  // Only essential init before first frame
+  // Initialize fast local services before first frame
+  ApiClient().init();
+
+  if (!Platform.isAndroid && !Platform.isIOS) {
+    final dir = Directory('${Platform.environment['HOME'] ?? '.'}/.ibrahim_app');
+    if (!dir.existsSync()) dir.createSync(recursive: true);
+    await LocalStorage.init(path: dir.path);
+  } else {
+    await LocalStorage.init();
+  }
+
   await SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
 
   SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
@@ -74,13 +84,13 @@ Future<void> main() async {
     ),
   );
 
-  // Heavy init deferred to after first frame
+  // Heavy network services deferred to after first frame
   WidgetsBinding.instance.addPostFrameCallback((_) async {
-    await _initServices();
+    await _initNetworkServices();
   });
 }
 
-Future<void> _initServices() async {
+Future<void> _initNetworkServices() async {
   if (Platform.isAndroid || Platform.isIOS) {
     try {
       await Firebase.initializeApp();
@@ -90,16 +100,6 @@ Future<void> _initServices() async {
     }
     await RemoteConfigService.init();
   }
-
-  if (!Platform.isAndroid && !Platform.isIOS) {
-    final dir = Directory('${Platform.environment['HOME'] ?? '.'}/.ibrahim_app');
-    if (!dir.existsSync()) dir.createSync(recursive: true);
-    await LocalStorage.init(path: dir.path);
-  } else {
-    await LocalStorage.init();
-  }
-
-  ApiClient().init();
 
   if (Platform.isAndroid || Platform.isIOS) {
     await NotificationService().init();
