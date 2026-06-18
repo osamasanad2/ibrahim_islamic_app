@@ -56,6 +56,31 @@ Future<void> main() async {
     );
   };
 
+  // Only essential init before first frame
+  await SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
+
+  SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
+    statusBarColor: Colors.transparent,
+    statusBarIconBrightness: Brightness.light,
+  ));
+
+  final container = ProviderContainer();
+  await container.read(localeProvider.notifier).load();
+
+  runApp(
+    UncontrolledProviderScope(
+      container: container,
+      child: const IbrahimApp(),
+    ),
+  );
+
+  // Heavy init deferred to after first frame
+  WidgetsBinding.instance.addPostFrameCallback((_) async {
+    await _initServices();
+  });
+}
+
+Future<void> _initServices() async {
   if (Platform.isAndroid || Platform.isIOS) {
     try {
       await Firebase.initializeApp();
@@ -73,13 +98,6 @@ Future<void> main() async {
   } else {
     await LocalStorage.init();
   }
-
-  await SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
-
-  SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
-    statusBarColor: Colors.transparent,
-    statusBarIconBrightness: Brightness.light,
-  ));
 
   ApiClient().init();
 
@@ -99,14 +117,4 @@ Future<void> main() async {
       ),
     ));
   }
-
-  final container = ProviderContainer();
-  await container.read(localeProvider.notifier).load();
-
-  runApp(
-    UncontrolledProviderScope(
-      container: container,
-      child: const IbrahimApp(),
-    ),
-  );
 }
