@@ -1,5 +1,7 @@
 import 'package:audio_service/audio_service.dart';
 import 'package:just_audio/just_audio.dart';
+import 'audio_focus.dart';
+import 'quran_audio.dart';
 
 class QuranAudioHandler extends BaseAudioHandler {
   static QuranAudioHandler? instance;
@@ -97,6 +99,10 @@ class QuranAudioHandler extends BaseAudioHandler {
   }
 
   Future<void> _playSurah(int number, String url, {String? nameStr, String? reciter}) async {
+    AudioFocus().request(() {
+      player.stop();
+    });
+
     currentSurah = number;
     _surahName = nameStr ?? '';
     _reciterName = reciter ?? '';
@@ -118,13 +124,8 @@ class QuranAudioHandler extends BaseAudioHandler {
   }
 
   Future<void> _playByNumber(int number) async {
-    final url = _buildSurahUrl(number, _reciterCode);
+    final url = QuranAudio.getSurahUrl(number, reciterCode: _reciterCode);
     await _playSurah(number, url, nameStr: _surahName, reciter: _reciterName);
-  }
-
-  String _buildSurahUrl(int number, String code) {
-    final num = number.toString().padLeft(3, '0');
-    return 'https://server8.mp3quran.net/$code/$num.mp3';
   }
 
   void _onPlayerStateChanged(PlayerState state) {

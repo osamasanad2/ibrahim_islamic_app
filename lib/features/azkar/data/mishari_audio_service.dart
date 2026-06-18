@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:just_audio/just_audio.dart';
+import '../../../core/utils/audio_focus.dart';
 
 class MishariAzkarAudioService {
   final AudioPlayer _player = AudioPlayer();
@@ -27,6 +28,7 @@ class MishariAzkarAudioService {
       _isLoading = state.processingState == ProcessingState.loading ||
           state.processingState == ProcessingState.buffering;
       if (state.processingState == ProcessingState.completed) {
+        AudioFocus().release();
         _isPlaying = false;
         _isPaused = false;
         _currentCategory = null;
@@ -44,6 +46,13 @@ class MishariAzkarAudioService {
   }
 
   Future<void> _playAsset(String path, String category, int total) async {
+    AudioFocus().request(() {
+      _player.stop();
+      _isPlaying = false;
+      _isPaused = false;
+      _currentCategory = null;
+    });
+
     await _player.stop();
     _currentCategory = category;
     _totalItems = total;
@@ -59,6 +68,16 @@ class MishariAzkarAudioService {
     }
   }
 
+  Future<void> stop() async {
+    AudioFocus().release();
+    await _player.stop();
+    await _player.seek(Duration.zero);
+    _isPlaying = false;
+    _isPaused = false;
+    _currentCategory = null;
+    onStopped?.call();
+  }
+
   Future<void> togglePause() async {
     if (_isPlaying) {
       await _player.pause();
@@ -67,15 +86,6 @@ class MishariAzkarAudioService {
       await _player.play();
       _isPaused = false;
     }
-  }
-
-  Future<void> stop() async {
-    await _player.stop();
-    await _player.seek(Duration.zero);
-    _isPlaying = false;
-    _isPaused = false;
-    _currentCategory = null;
-    onStopped?.call();
   }
 
   void dispose() {

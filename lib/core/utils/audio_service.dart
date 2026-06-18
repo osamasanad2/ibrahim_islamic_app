@@ -1,4 +1,3 @@
-import 'dart:io';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:just_audio/just_audio.dart';
 import 'audio_handler.dart';
@@ -42,7 +41,20 @@ class AudioService {
 
   Future<void> pause() async => _player.pause();
   Future<void> resume() async => _player.play();
-  Future<void> stop() async => _player.stop();
+  Future<void> stop() async {
+    if (_handler != null) {
+      await _handler!.stop();
+    } else {
+      await _player.stop();
+    }
+  }
+
+  Future<dynamic> customAction(String name, [Map<String, dynamic>? args]) async {
+    if (_handler != null) {
+      return _handler!.customAction(name, args);
+    }
+    return null;
+  }
   Future<void> seek(Duration position) async => _player.seek(position);
 
   Future<void> setVolume(double volume) async {

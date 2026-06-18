@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -6,6 +7,7 @@ import 'package:just_audio/just_audio.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_dimensions.dart';
 import '../../../core/services/recent_activity_service.dart';
+import '../../../core/utils/audio_service.dart';
 import '../../../core/utils/quran_audio.dart';
 import '../../../data/quran/quran_providers.dart';
 import '../../../data/quran/ayah_model.dart';
@@ -32,11 +34,10 @@ class _QuranMushafScreenState extends ConsumerState<QuranMushafScreen> {
   List<Map<String, dynamic>>? _surahPages;
   String _reciterKey = 'afs';
 
-  // مشغّل صوت المصحف المحلي
-  final AudioPlayer _audioPlayer = AudioPlayer();
   bool _isPlaying = false;
   bool _isLoading = false;
   int _playingSurah = 0;
+  StreamSubscription<ProcessingState>? _processingSub;
 
   @override
   void initState() {
@@ -50,7 +51,9 @@ class _QuranMushafScreenState extends ConsumerState<QuranMushafScreen> {
     _textMode = _storage.getBool('mushaf_text_mode', defaultValue: false);
     _bookmarkedPage = _storage.getQuranBookmark();
     _loadSurahPages();
-    _audioPlayer.playerStateStream.listen((state) {
+
+    final audio = ref.read(audioServiceProvider);
+    audio.stateStream.listen((state) {
       if (mounted) {
         setState(() {
           _isPlaying = state.playing;
@@ -59,12 +62,17 @@ class _QuranMushafScreenState extends ConsumerState<QuranMushafScreen> {
         });
       }
     });
+    _processingSub = audio.processingStateStream.listen((state) {
+      if (state == ProcessingState.completed) {
+        _playingSurah = 0;
+      }
+    });
   }
 
   @override
   void dispose() {
     _pageController.dispose();
-    _audioPlayer.dispose();
+    _processingSub?.cancel();
     super.dispose();
   }
 
@@ -172,18 +180,25 @@ class _QuranMushafScreenState extends ConsumerState<QuranMushafScreen> {
 
   Future<void> _togglePlaySurah() async {
     if (_isLoading) return;
+    final audio = ref.read(audioServiceProvider);
     try {
       if (_isPlaying) {
-        await _audioPlayer.pause();
+        await audio.pause();
       } else {
         final surah = _getSurahForPage(_currentPage);
         if (_playingSurah != surah) {
-          // سورة جديدة — أعد تحميل الرابط
-          final url = QuranAudio.getSurahUrl(surah, reciterCode: _reciterKey);
-          await _audioPlayer.setUrl(url);
           _playingSurah = surah;
+          final url = QuranAudio.getSurahUrl(surah, reciterCode: _reciterKey);
+          await audio.play(
+            url,
+            surahNumber: surah,
+            surahName: _getSurahName(surah),
+            reciterName: _reciterName(),
+            reciterCode: _reciterKey,
+          );
+        } else {
+          await audio.resume();
         }
-        await _audioPlayer.play();
       }
     } catch (e) {
       if (mounted) {
@@ -198,7 +213,7 @@ class _QuranMushafScreenState extends ConsumerState<QuranMushafScreen> {
   }
 
   Future<void> _stopAudio() async {
-    await _audioPlayer.stop();
+    await ref.read(audioServiceProvider).stop();
     _playingSurah = 0;
   }
 
